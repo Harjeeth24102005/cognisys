@@ -16,6 +16,7 @@ export const Contact = () => {
     subject: '',
     message: ''
   });
+  const [honeypot, setHoneypot] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -32,19 +33,16 @@ export const Contact = () => {
     setError(null);
 
     try {
-      // 1. Dispatch directly via SMTP protocol from frontend to contact.cognisys@gmail.com
+      // 1. Dispatch securely via free encrypted API to contact.cognisys@gmail.com
       const smtpRes = await smtpService.sendContactInquiry({
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim() || 'Not provided',
         subject: formData.subject.trim() || `Inquiry from ${formData.name.trim()}`,
-        message: formData.message.trim()
+        message: formData.message.trim(),
+        _honey: honeypot
       });
       setSmtpStatus(smtpRes);
-    } catch (err) {
-      console.warn('Inquiry dispatch note:', err);
-    } finally {
-      setLoading(false);
       setSubmitted(true);
       try {
         confetti({
@@ -53,6 +51,11 @@ export const Contact = () => {
           origin: { y: 0.6 }
         });
       } catch (err) {}
+    } catch (err) {
+      console.warn('Inquiry dispatch note:', err);
+      setError(err.message || 'Transmission encountered an issue. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -293,6 +296,33 @@ export const Contact = () => {
                   <p style={{ fontSize: '0.88rem', color: '#1E293B', marginBottom: '24px', fontWeight: 500 }}>
                     All messages are routed directly to <strong style={{ color: '#0B132B' }}>contact.cognisys@gmail.com</strong>.
                   </p>
+
+                  {error && (
+                    <div style={{
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      background: 'rgba(239, 68, 68, 0.08)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
+                      color: '#DC2626',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      marginBottom: '18px'
+                    }}>
+                      {error}
+                    </div>
+                  )}
+
+                  {/* Honeypot anti-spam trap (invisible to human users) */}
+                  <div style={{ display: 'none' }} aria-hidden="true">
+                    <input
+                      type="text"
+                      name="_honey"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      tabIndex="-1"
+                      autoComplete="off"
+                    />
+                  </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
                     <div>

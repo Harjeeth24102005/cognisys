@@ -409,6 +409,20 @@ export const CartDrawer = () => {
                 <span>All specifications are transmitted automatically to <strong>contact.cognisys@gmail.com</strong>.</span>
               </div>
 
+              {error && (
+                <div style={{
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid rgba(239, 68, 68, 0.25)',
+                  color: '#DC2626',
+                  fontSize: '0.82rem',
+                  fontWeight: 600
+                }}>
+                  {error}
+                </div>
+              )}
+
               {/* Purchase Action Button */}
               <button
                 type="submit"

@@ -629,6 +629,22 @@ export const OrderWizard = () => {
                   </div>
                 )}
 
+                {/* Error Banner */}
+                {error && (
+                  <div style={{
+                    padding: '12px 18px',
+                    borderRadius: '8px',
+                    background: 'rgba(239, 68, 68, 0.08)',
+                    border: '1px solid rgba(239, 68, 68, 0.25)',
+                    color: '#DC2626',
+                    fontSize: '0.88rem',
+                    fontWeight: 600,
+                    marginBottom: '20px'
+                  }}>
+                    {error}
+                  </div>
+                )}
+
                 {/* Navigation Buttons */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   {step > 1 ? (
