@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Cognisys | Redirecting...</title>
+    <script>
+      // Single Page Apps for GitHub Pages
+      // Redirect 404 to root with hash routing
+      sessionStorage.redirect = location.href;
+      var path = location.pathname;
+      var repo = '/cognisys/';
+      if (path.startsWith(repo)) {
+        var subpath = path.slice(repo.length);
+        if (subpath) {
+          location.replace(repo + '#' + (subpath.startsWith('/') ? subpath : '/' + subpath));
+        } else {
+          location.replace(repo);
+        }
+      } else {
+        location.replace('./');
+      }
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to Cognisys...</p>
+  </body>
+</html>

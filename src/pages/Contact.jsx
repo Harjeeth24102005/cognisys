@@ -260,10 +260,10 @@ export const Contact = () => {
                     Message Transmitted to Engineering!
                   </h3>
                   <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', marginBottom: '16px' }}>
-                    ⚡ DISPATCHED VIA SMTP PROTOCOL DIRECTLY TO MAIL
+                    ⚡ DISPATCHED DIRECTLY TO CONTACT.COGNISYS@GMAIL.COM
                   </div>
                   <p style={{ fontSize: '0.94rem', color: '#1E293B', marginBottom: '24px', lineHeight: 1.6, fontWeight: 500 }}>
-                    Thank you, <strong style={{ color: '#0B132B' }}>{formData.name}</strong>. Your technical inquiry has been transmitted via SMTP to <strong style={{ color: '#0284C7' }}>contact.cognisys@gmail.com</strong>. Our team will review your specifications and contact you shortly.
+                    Thank you, <strong style={{ color: '#0B132B' }}>{formData.name}</strong>. Your technical inquiry has been transmitted to <strong style={{ color: '#0284C7' }}>contact.cognisys@gmail.com</strong>. Our team will review your specifications and contact you shortly.
                   </p>
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <a

@@ -73,11 +73,7 @@ export const CartDrawer = () => {
         });
       } catch (err) {}
 
-      // Automatically launch user's email client
-      const cartMailto = `mailto:contact.cognisys@gmail.com?subject=${encodeURIComponent(`[ORDER #${res.order_number}] - ${res.title || 'Service Purchase'}`)}&body=${encodeURIComponent(`Order #${res.order_number}\nClient: ${res.customer_name} (${res.customer_email} | ${res.customer_phone})\n\nRequirements:\n${res.description || 'Project Order'}`)}`;
-      setTimeout(() => {
-        window.location.href = cartMailto;
-      }, 700);
+      // Order successfully submitted and dispatched via direct mail relay
     } catch (err) {
       setError(err.message || 'Failed to transmit specifications. Please try again.');
     } finally {
@@ -184,10 +180,10 @@ export const CartDrawer = () => {
                 Order Specifications Dispatched
               </h3>
               <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.75rem', fontWeight: 700, padding: '3px 12px', borderRadius: '20px', marginBottom: '14px' }}>
-                ⚡ DISPATCHED VIA SMTP PROTOCOL DIRECTLY TO MAIL
+                ⚡ DISPATCHED DIRECTLY TO CONTACT.COGNISYS@GMAIL.COM
               </div>
               <p style={{ fontSize: '0.9rem', color: '#1E293B', marginBottom: '24px', lineHeight: 1.5, fontWeight: 500 }}>
-                Your complete technical requirements have been received and transmitted via SMTP directly to <strong style={{ color: '#0284C7' }}>contact.cognisys@gmail.com</strong>.
+                Your complete technical requirements have been received and transmitted directly to <strong style={{ color: '#0284C7' }}>contact.cognisys@gmail.com</strong>.
               </p>
 
               <div style={{

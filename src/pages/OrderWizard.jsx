@@ -148,11 +148,7 @@ export const OrderWizard = () => {
         });
       } catch (err) {}
 
-      // Auto-launch user's email client with pre-filled details to send directly
-      const mailtoUrl = `mailto:contact.cognisys@gmail.com?subject=${encodeURIComponent(`[ORDER #${newOrder.order_number}] - ${newOrder.title}`)}&body=${encodeURIComponent(`Client: ${newOrder.customer_name}\nEmail: ${newOrder.customer_email}\nPhone: ${newOrder.customer_phone}\nService: ${newOrder.service_name}\nOrder Ref: #${newOrder.order_number}\n\nSpecifications:\n${newOrder.description}`)}`;
-      setTimeout(() => {
-        window.location.href = mailtoUrl;
-      }, 700);
+      // Order successfully submitted and dispatched via direct mail relay
     } catch (err) {
       setError(err.message || 'Failed to submit order specifications. Please try again.');
     } finally {
@@ -203,10 +199,10 @@ export const OrderWizard = () => {
                   Specifications Transmitted Successfully!
                 </h2>
                 <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '16px' }}>
-                  ⚡ DISPATCHED VIA SMTP PROTOCOL DIRECTLY TO MAIL
+                  ⚡ DISPATCHED DIRECTLY TO CONTACT.COGNISYS@GMAIL.COM
                 </div>
                 <p style={{ fontSize: '0.95rem', color: '#1E293B', maxWidth: '560px', margin: '0 auto 24px', lineHeight: 1.6, fontWeight: 500 }}>
-                  Your technical requirements for <strong>{submittedOrder.title}</strong> have been registered under Reference <strong>#{submittedOrder.order_number}</strong> and transmitted via SMTP directly to <strong>contact.cognisys@gmail.com</strong>.
+                  Your technical requirements for <strong>{submittedOrder.title}</strong> have been registered under Reference <strong>#{submittedOrder.order_number}</strong> and transmitted directly to <strong>contact.cognisys@gmail.com</strong>.
                 </p>
 
                 <div style={{
