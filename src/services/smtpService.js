@@ -25,10 +25,10 @@ export const EMAIL_API_CONFIG = {
 
   // EmailJS Configuration (Direct sending through your Gmail)
   emailJS: {
-    serviceId: '',
-    templateAdminId: '',
-    templateClientId: '',
-    publicKey: ''
+    serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
+    templateAdminId: import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID || '',
+    templateClientId: import.meta.env.VITE_EMAILJS_CLIENT_TEMPLATE_ID || '',
+    publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ''
   },
 
   // StaticForms API
@@ -167,16 +167,27 @@ export const smtpService = {
     const emailJsResult = await dispatchViaEmailJS(
       {
         to_email: EMAIL_API_CONFIG.receiverEmail,
+        receiver_email: EMAIL_API_CONFIG.receiverEmail,
         client_name: clientName,
+        from_name: clientName,
+        name: clientName,
         client_email: clientEmail,
+        from_email: clientEmail,
+        email: clientEmail,
+        reply_to: clientEmail,
         client_phone: clientPhone,
+        phone: clientPhone,
         subject: fullSubject,
         message: message,
-        submitted_at: dateStr
+        inquiry_details: message,
+        submitted_at: dateStr,
+        helpline_phone: EMAIL_API_CONFIG.helplinePhone
       },
       {
         to_email: clientEmail,
         client_name: clientName,
+        name: clientName,
+        to_name: clientName,
         helpline_phone: EMAIL_API_CONFIG.helplinePhone,
         receiver_email: EMAIL_API_CONFIG.receiverEmail,
         autoresponder_message: getAutoresponderMessage(clientName)
@@ -275,22 +286,34 @@ export const smtpService = {
     const emailJsResult = await dispatchViaEmailJS(
       {
         to_email: EMAIL_API_CONFIG.receiverEmail,
+        receiver_email: EMAIL_API_CONFIG.receiverEmail,
         order_number: orderNumber,
         client_name: clientName,
+        from_name: clientName,
+        name: clientName,
         client_email: clientEmail,
+        from_email: clientEmail,
+        email: clientEmail,
+        reply_to: clientEmail,
         client_phone: clientPhone,
+        phone: clientPhone,
         service_name: serviceName,
         project_title: title,
+        title: title,
         description: description,
+        message: description,
         budget: budget,
         timeline: timeline,
         tech_preferences: tech,
         cart_items: cartSummary,
-        submitted_at: dateStr
+        submitted_at: dateStr,
+        helpline_phone: EMAIL_API_CONFIG.helplinePhone
       },
       {
         to_email: clientEmail,
         client_name: clientName,
+        name: clientName,
+        to_name: clientName,
         order_number: orderNumber,
         helpline_phone: EMAIL_API_CONFIG.helplinePhone,
         receiver_email: EMAIL_API_CONFIG.receiverEmail,
