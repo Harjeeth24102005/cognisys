@@ -333,11 +333,20 @@ export const Contact = () => {
 
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <a
-                      href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(formData.email)}&subject=${encodeURIComponent(`[COGNISYS] ${formData.subject || `Inquiry from ${formData.name}`}`)}&body=${encodeURIComponent(`Dear Cognisys Team,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage Details:\n${formData.message}\n\nEmergency Helpline: 8248349844`)}`}
+                      href={`https://mail.google.com/mail/?view=cm&fs=1&to=contact.cognisys@gmail.com&cc=${encodeURIComponent(formData.email)}&su=${encodeURIComponent(`[COGNISYS INQUIRY] ${formData.subject || 'Website Message'} from ${formData.name}`)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nSubject: ${formData.subject}\n\nMessage Details:\n${formData.message}\n\nEmergency Helpline: +91 82483 49844`)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="btn-primary"
                       style={{ textDecoration: 'none', padding: '12px 22px', fontSize: '0.88rem' }}
                     >
-                      <span>Open in Mail App (CC to you)</span>
+                      <span>Send via Gmail Web</span>
+                    </a>
+                    <a
+                      href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(formData.email)}&subject=${encodeURIComponent(`[COGNISYS] ${formData.subject || `Inquiry from ${formData.name}`}`)}&body=${encodeURIComponent(`Dear Cognisys Team,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage Details:\n${formData.message}\n\nEmergency Helpline: 8248349844`)}`}
+                      className="btn-secondary"
+                      style={{ textDecoration: 'none', padding: '12px 20px', fontSize: '0.88rem' }}
+                    >
+                      <span>Open in Mail App</span>
                     </a>
                     <button
                       onClick={() => {

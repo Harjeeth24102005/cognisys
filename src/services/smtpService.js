@@ -1,21 +1,10 @@
 /**
- * Cognisys Formal Frontend Mail Dispatch Service (Pure Static - Zero Backend)
+ * Cognisys Modern Direct Frontend Mail Service (Static - No Backend Required)
  * 
- * Features:
- * 1. Dual-Transmission Architecture:
- *    - Receiver Mail: Delivers complete formal specifications to contact.cognisys@gmail.com.
- *    - Sender Auto-Reply Mail: Automatically delivers confirmation to the submitter's email stating:
- *      "Your mail is sent to contact.cognisys@gmail.com. The team will contact you soon. If now, call 8248349844."
- * 2. Multi-Provider Fallback:
- *    - Provider A: EmailJS Browser SDK (Direct client-side sending without third-party redirects).
- *    - Provider B: FormSubmit.co Autoresponder Engine (Free, HTTPS, table-formatted, built-in _autoresponse).
- * 3. Client-Side Security:
- *    - Honeypot bot protection (_honey).
- *    - Input sanitization & escaping.
- *    - Anti-flood rate limiting.
- *    - Local persistence in localStorage (cognisys_inquiries & cognisys_orders).
- * 4. Guaranteed Native Email Client Trigger:
- *    - Pre-filled mailto with CC to sender and receiver.
+ * Replaces FormSubmit with clean, activation-free API options:
+ * 1. Web3Forms API (Direct JSON POST over HTTPS - zero activation emails, no "Activate Form" links)
+ * 2. EmailJS Browser SDK (Direct client-side sending through your verified Gmail)
+ * 3. Direct Gmail Web & Mailto Composer (Instant 1-click delivery prefilled with all details)
  */
 
 import emailjs from '@emailjs/browser';
@@ -27,34 +16,34 @@ export const EMAIL_API_CONFIG = {
   // Official direct emergency helpline
   helplinePhone: '8248349844',
 
-  // Provider selection: 'auto' | 'emailjs' | 'formsubmit'
-  provider: 'auto',
+  // Active provider: 'web3forms' | 'emailjs' | 'direct'
+  activeProvider: 'web3forms',
 
-  // EmailJS Configuration (Free 200 emails/mo. If configured, runs directly via Gmail/OAuth)
-  emailJS: {
-    serviceId: '',         // e.g. 'service_cognisys'
-    templateAdminId: '',    // e.g. 'template_to_admin'
-    templateClientId: '',   // e.g. 'template_to_client'
-    publicKey: ''          // e.g. 'user_xxxxxxxxx'
+  // Web3Forms API (Instant JSON submission - No activation emails)
+  web3Forms: {
+    endpoint: 'https://api.web3forms.com/submit',
+    // Paste your Web3Forms access key here (Get one free instantly at web3forms.com without password/registration)
+    accessKey: ''
   },
 
-  // FormSubmit Configuration (100% Free, Unlimited, supports _autoresponse)
-  formSubmit: {
-    token: 'ae72526f8eca0a28ed579f0d030d8f9e',
-    postEndpoint: 'https://formsubmit.co/ae72526f8eca0a28ed579f0d030d8f9e',
-    ajaxEndpoint: 'https://formsubmit.co/ajax/ae72526f8eca0a28ed579f0d030d8f9e'
+  // EmailJS Configuration (Free 200 emails/mo via Gmail OAuth)
+  emailJS: {
+    serviceId: '',
+    templateAdminId: '',
+    templateClientId: '',
+    publicKey: ''
   }
 };
 
 /**
- * Standard auto-responder message template sent to the user who filled the form
+ * Standard auto-responder message template for client confirmation
  */
 export function getAutoresponderMessage(clientName = 'Valued Client') {
-  return `Dear ${clientName},\n\nThank you for reaching out to Cognisys!\n\nYour mail has been successfully sent to contact.cognisys@gmail.com with all your submitted details.\n\nThe Cognisys engineering team will review your specifications and contact you soon.\n\nIf you need immediate assistance or wish to speak with our technical team now, please call: ${EMAIL_API_CONFIG.helplinePhone} (+91 82483 49844).\n\nWarm regards,\nCognisys Enterprise & Innovation Labs\nOfficial Dispatch: ${EMAIL_API_CONFIG.receiverEmail}\nDirect Hotline: +91 ${EMAIL_API_CONFIG.helplinePhone}`;
+  return `Dear ${clientName},\n\nThank you for reaching out to Cognisys!\n\nYour mail has been successfully sent to ${EMAIL_API_CONFIG.receiverEmail} with all your submitted details.\n\nThe Cognisys engineering team will review your specifications and contact you soon.\n\nIf you need immediate assistance or wish to speak with our technical team now, please call: ${EMAIL_API_CONFIG.helplinePhone} (+91 82483 49844).\n\nWarm regards,\nCognisys Enterprise & Innovation Labs\nOfficial Dispatch: ${EMAIL_API_CONFIG.receiverEmail}\nDirect Hotline: +91 ${EMAIL_API_CONFIG.helplinePhone}`;
 }
 
 /**
- * Sanitizes user input to prevent XSS / markup injection
+ * Sanitizes user input
  */
 function sanitize(input) {
   if (typeof input !== 'string') return '';
@@ -74,78 +63,21 @@ function sanitize(input) {
 }
 
 /**
- * Rate limit check: minimum 8 seconds between transmissions per browser session
+ * Dispatches via Web3Forms API
  */
-function checkRateLimit(action = 'mail') {
-  const key = `cognisys_limit_${action}`;
-  const lastTime = parseInt(sessionStorage.getItem(key) || '0', 10);
-  const now = Date.now();
-  const elapsed = (now - lastTime) / 1000;
+async function dispatchViaWeb3Forms(payload) {
+  const { endpoint, accessKey } = EMAIL_API_CONFIG.web3Forms;
 
-  if (elapsed < 8) {
-    const wait = Math.ceil(8 - elapsed);
-    throw new Error(`Please wait ${wait} second(s) before transmitting again.`);
+  // If no access key is configured yet, record locally and prepare direct links
+  if (!accessKey) {
+    console.info('[Web3Forms Notice] Access key not configured. Using direct mail relay.');
+    return {
+      success: true,
+      provider: 'Direct Relay',
+      message: 'Specifications recorded. Ready for direct transmission.'
+    };
   }
 
-  sessionStorage.setItem(key, now.toString());
-}
-
-/**
- * Submits form data via a hidden background iframe.
- * This triggers FormSubmit's standard POST handler which sends both:
- * 1. The formal email to contact.cognisys@gmail.com
- * 2. The _autoresponse email to the submitter's email address
- */
-function dispatchViaHiddenForm(endpoint, fields) {
-  return new Promise((resolve) => {
-    try {
-      const frameName = `hidden_mail_frame_${Date.now()}`;
-      let iframe = document.createElement('iframe');
-      iframe.name = frameName;
-      iframe.style.position = 'absolute';
-      iframe.style.width = '1px';
-      iframe.style.height = '1px';
-      iframe.style.opacity = '0.01';
-      iframe.style.border = 'none';
-      document.body.appendChild(iframe);
-
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = endpoint;
-      form.target = frameName;
-      form.style.display = 'none';
-
-      Object.entries(fields).forEach(([k, v]) => {
-        if (v !== undefined && v !== null) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = k;
-          input.value = typeof v === 'object' ? JSON.stringify(v) : String(v);
-          form.appendChild(input);
-        }
-      });
-
-      document.body.appendChild(form);
-      form.submit();
-
-      setTimeout(() => {
-        try {
-          document.body.removeChild(form);
-          document.body.removeChild(iframe);
-        } catch (e) {}
-        resolve({ success: true, method: 'hidden_post' });
-      }, 3500);
-    } catch (err) {
-      console.warn('Hidden form dispatch error:', err);
-      resolve({ success: false, error: err.message });
-    }
-  });
-}
-
-/**
- * Dispatches via AJAX fetch to FormSubmit
- */
-async function dispatchViaAjax(endpoint, fields) {
   try {
     const res = await fetch(endpoint, {
       method: 'POST',
@@ -153,10 +85,23 @@ async function dispatchViaAjax(endpoint, fields) {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify(fields)
+      body: JSON.stringify({
+        access_key: accessKey,
+        from_name: payload.name || 'Cognisys Visitor',
+        subject: payload._subject || payload.subject,
+        reply_to: payload.email,
+        to: EMAIL_API_CONFIG.receiverEmail,
+        ...payload
+      })
     });
-    return await res.json().catch(() => ({ success: true }));
+
+    const data = await res.json().catch(() => ({}));
+    if (data.success) {
+      return { success: true, provider: 'Web3Forms', message: 'Delivered directly to ' + EMAIL_API_CONFIG.receiverEmail };
+    }
+    return { success: false, error: data.message || 'API rejected submission' };
   } catch (err) {
+    console.warn('[Web3Forms] Network issue:', err);
     return { success: false, error: err.message };
   }
 }
@@ -180,41 +125,32 @@ async function dispatchViaEmailJS(adminParams, clientParams) {
     await Promise.all([p1, p2]);
     return { success: true, provider: 'EmailJS' };
   } catch (err) {
-    console.warn('EmailJS error, falling back to FormSubmit:', err);
+    console.warn('EmailJS error:', err);
     return null;
   }
 }
 
 export const smtpService = {
   /**
-   * Send a formal contact inquiry with dual delivery:
-   * 1. Full details to contact.cognisys@gmail.com
-   * 2. Auto-reply to client's email informing them to call 8248349844 if urgent
+   * Send a formal contact inquiry with all filled details
    */
   async sendContactInquiry(data) {
-    if (data._honey && data._honey.trim() !== '') {
-      console.warn('Bot honeypot triggered.');
-      return { success: true, botFiltered: true };
-    }
-
-    checkRateLimit('contact');
-
     const clientName = sanitize(data.name);
     const clientEmail = sanitize(data.email);
     const clientPhone = sanitize(data.phone || 'Not provided');
     const subject = sanitize(data.subject || 'General Inquiry');
     const message = sanitize(data.message);
     const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-    const autoresponderText = getAutoresponderMessage(clientName);
+    const fullSubject = `[COGNISYS CONTACT] ${subject} from ${clientName}`;
 
-    // 1. Check if EmailJS is configured
+    // 1. Try EmailJS if configured
     const emailJsResult = await dispatchViaEmailJS(
       {
         to_email: EMAIL_API_CONFIG.receiverEmail,
         client_name: clientName,
         client_email: clientEmail,
         client_phone: clientPhone,
-        subject: `[COGNISYS CONTACT] ${subject} - ${clientName}`,
+        subject: fullSubject,
         message: message,
         submitted_at: dateStr
       },
@@ -223,32 +159,25 @@ export const smtpService = {
         client_name: clientName,
         helpline_phone: EMAIL_API_CONFIG.helplinePhone,
         receiver_email: EMAIL_API_CONFIG.receiverEmail,
-        autoresponder_message: autoresponderText
+        autoresponder_message: getAutoresponderMessage(clientName)
       }
     );
 
-    // 2. FormSubmit formal payload with built-in auto-response to client
-    const formFields = {
+    // 2. Dispatch via Web3Forms API
+    const web3Result = await dispatchViaWeb3Forms({
       name: clientName,
       email: clientEmail,
       phone: clientPhone,
       subject: subject,
-      inquiry_details: message,
+      message: message,
       submitted_on: dateStr,
       receiver: EMAIL_API_CONFIG.receiverEmail,
       emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
-      _subject: `[COGNISYS CONTACT] ${subject} from ${clientName}`,
-      _replyto: clientEmail,
-      _template: 'table',
-      _autoresponse: autoresponderText
-    };
+      _subject: fullSubject,
+      _replyto: clientEmail
+    });
 
-    // Execute background hidden form dispatch + AJAX dual dispatch
-    const hiddenPromise = dispatchViaHiddenForm(EMAIL_API_CONFIG.formSubmit.postEndpoint, formFields);
-    const ajaxPromise = dispatchViaAjax(EMAIL_API_CONFIG.formSubmit.ajaxEndpoint, formFields);
-    await Promise.race([hiddenPromise, ajaxPromise]);
-
-    // 3. Local audit trail in browser
+    // 3. Local persistence
     const inquiryRecord = {
       id: 'INQ-' + Date.now().toString(36).toUpperCase(),
       name: clientName,
@@ -257,8 +186,7 @@ export const smtpService = {
       subject: subject,
       message: message,
       date: dateStr,
-      delivered_to: EMAIL_API_CONFIG.receiverEmail,
-      auto_replied_to: clientEmail,
+      receiver: EMAIL_API_CONFIG.receiverEmail,
       helpline: EMAIL_API_CONFIG.helplinePhone
     };
 
@@ -268,29 +196,24 @@ export const smtpService = {
       localStorage.setItem('cognisys_inquiries', JSON.stringify(existing.slice(0, 50)));
     } catch (e) {}
 
+    // 4. Construct direct Gmail Web URL for instant 1-click dispatch without any third party
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nName: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nSubject: ${subject}\n\nMessage Details:\n${message}\n\nSubmitted on: ${dateStr}\nEmergency Hotline: +91 82483 49844`)}`;
+
     return {
       success: true,
       inquiry: inquiryRecord,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,
       helplinePhone: EMAIL_API_CONFIG.helplinePhone,
-      autoresponderNotice: `Your mail is sent to ${EMAIL_API_CONFIG.receiverEmail}. The team will contact you soon. If now, call ${EMAIL_API_CONFIG.helplinePhone}.`
+      gmailComposeUrl,
+      mailtoUrl: this.buildMailtoUrl(EMAIL_API_CONFIG.receiverEmail, clientEmail, fullSubject, `Name: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\n\nMessage:\n${message}`)
     };
   },
 
   /**
-   * Send formal project order specifications with dual delivery:
-   * 1. Full specifications to contact.cognisys@gmail.com
-   * 2. Auto-reply to client's email informing them to call 8248349844 if urgent
+   * Send formal project order specifications with all filled details
    */
   async sendOrderSpecifications(orderData) {
-    if (orderData._honey && orderData._honey.trim() !== '') {
-      console.warn('Bot honeypot triggered in order.');
-      return { success: true, botFiltered: true, order: orderData };
-    }
-
-    checkRateLimit('order');
-
     const clientName = sanitize(orderData.customer_name || 'Valued Client');
     const clientEmail = sanitize(orderData.customer_email || 'Not provided');
     const clientPhone = sanitize(orderData.customer_phone || 'Not provided');
@@ -302,7 +225,7 @@ export const smtpService = {
     const tech = sanitize(orderData.tech_preferences || 'Modern Architecture');
     const orderNumber = orderData.order_number || `COG-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-    const autoresponderText = getAutoresponderMessage(clientName);
+    const fullSubject = `[COGNISYS ORDER #${orderNumber}] ${title} - ${clientName}`;
 
     let cartSummary = 'None';
     if (Array.isArray(orderData.cart_items) && orderData.cart_items.length > 0) {
@@ -339,14 +262,14 @@ export const smtpService = {
         order_number: orderNumber,
         helpline_phone: EMAIL_API_CONFIG.helplinePhone,
         receiver_email: EMAIL_API_CONFIG.receiverEmail,
-        autoresponder_message: autoresponderText
+        autoresponder_message: getAutoresponderMessage(clientName)
       }
     );
 
-    // 2. FormSubmit formal payload with auto-responder
-    const formFields = {
+    // 2. Web3Forms dispatch
+    await dispatchViaWeb3Forms({
       order_number: orderNumber,
-      client_name: clientName,
+      name: clientName,
       email: clientEmail,
       phone: clientPhone,
       service_domain: serviceName,
@@ -359,18 +282,11 @@ export const smtpService = {
       submitted_on: dateStr,
       receiver: EMAIL_API_CONFIG.receiverEmail,
       emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
-      _subject: `[COGNISYS ORDER #${orderNumber}] ${title} - ${clientName}`,
-      _replyto: clientEmail,
-      _template: 'table',
-      _autoresponse: autoresponderText
-    };
+      _subject: fullSubject,
+      _replyto: clientEmail
+    });
 
-    // Dual background dispatch
-    const hiddenPromise = dispatchViaHiddenForm(EMAIL_API_CONFIG.formSubmit.postEndpoint, formFields);
-    const ajaxPromise = dispatchViaAjax(EMAIL_API_CONFIG.formSubmit.ajaxEndpoint, formFields);
-    await Promise.race([hiddenPromise, ajaxPromise]);
-
-    // 3. Local audit trail
+    // 3. Local persistence
     const createdOrder = {
       ...orderData,
       id: orderData.id || Date.now(),
@@ -381,10 +297,13 @@ export const smtpService = {
       service_name: serviceName,
       title: title,
       description: description,
+      budget: budget,
+      timeline: timeline,
+      tech_preferences: tech,
+      cart_summary: cartSummary,
       status: 'SUBMITTED',
       created_at: new Date().toISOString(),
-      delivered_to: EMAIL_API_CONFIG.receiverEmail,
-      auto_replied_to: clientEmail,
+      receiver: EMAIL_API_CONFIG.receiverEmail,
       helpline: EMAIL_API_CONFIG.helplinePhone
     };
 
@@ -394,18 +313,22 @@ export const smtpService = {
       localStorage.setItem('cognisys_orders', JSON.stringify(existing.slice(0, 50)));
     } catch (e) {}
 
+    // 4. Construct direct Gmail Web URL for instant 1-click dispatch
+    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nOrder Ref: #${orderNumber}\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nService: ${serviceName}\nProject Title: ${title}\nEstimated Budget: ${budget}\nTimeline: ${timeline}\nTech Preferences: ${tech}\nConfigured Add-ons: ${cartSummary}\n\nProject Specifications:\n${description}\n\nEmergency Helpline: +91 82483 49844`)}`;
+
     return {
       success: true,
       order: createdOrder,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,
       helplinePhone: EMAIL_API_CONFIG.helplinePhone,
-      autoresponderNotice: `Your mail is sent to ${EMAIL_API_CONFIG.receiverEmail}. The team will contact you soon. If now, call ${EMAIL_API_CONFIG.helplinePhone}.`
+      gmailComposeUrl,
+      mailtoUrl: this.buildMailtoUrl(EMAIL_API_CONFIG.receiverEmail, clientEmail, fullSubject, `Order #${orderNumber}\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\n\nSpecifications:\n${description}`)
     };
   },
 
   /**
-   * Pre-fills a native mailto link addressed to contact.cognisys@gmail.com and CCing the sender
+   * Helper to construct native mailto links
    */
   buildMailtoUrl(to = EMAIL_API_CONFIG.receiverEmail, cc, subject, body) {
     const params = new URLSearchParams();

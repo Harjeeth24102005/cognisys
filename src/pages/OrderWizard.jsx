@@ -287,11 +287,20 @@ export const OrderWizard = () => {
 
                 <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <a
-                    href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(submittedOrder.customer_email)}&subject=${encodeURIComponent(`[COGNISYS ORDER #${submittedOrder.order_number}] - ${submittedOrder.title}`)}&body=${encodeURIComponent(`Order #${submittedOrder.order_number}\nClient: ${submittedOrder.customer_name}\nEmail: ${submittedOrder.customer_email}\nPhone: ${submittedOrder.customer_phone}\nService: ${submittedOrder.service_name}\nTimeline: ${submittedOrder.timeline}\nBudget: ${submittedOrder.budget}\n\nSpecifications:\n${submittedOrder.description}\n\nEmergency Helpline: 8248349844`)}`}
+                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=contact.cognisys@gmail.com&cc=${encodeURIComponent(submittedOrder.customer_email)}&su=${encodeURIComponent(`[COGNISYS ORDER #${submittedOrder.order_number}] - ${submittedOrder.title}`)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nOrder Ref: #${submittedOrder.order_number}\nClient: ${submittedOrder.customer_name}\nEmail: ${submittedOrder.customer_email}\nPhone: ${submittedOrder.customer_phone}\nService: ${submittedOrder.service_name}\nTimeline: ${submittedOrder.timeline}\nBudget: ${submittedOrder.budget}\n\nSpecifications:\n${submittedOrder.description}\n\nEmergency Helpline: +91 82483 49844`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="btn-primary"
                     style={{ textDecoration: 'none', padding: '12px 24px', fontSize: '0.9rem' }}
                   >
-                    <span>Open in Mail App (CC to you)</span>
+                    <span>Send via Gmail Web</span>
+                  </a>
+                  <a
+                    href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(submittedOrder.customer_email)}&subject=${encodeURIComponent(`[COGNISYS ORDER #${submittedOrder.order_number}] - ${submittedOrder.title}`)}&body=${encodeURIComponent(`Order #${submittedOrder.order_number}\nClient: ${submittedOrder.customer_name}\nEmail: ${submittedOrder.customer_email}\nPhone: ${submittedOrder.customer_phone}\nService: ${submittedOrder.service_name}\nTimeline: ${submittedOrder.timeline}\nBudget: ${submittedOrder.budget}\n\nSpecifications:\n${submittedOrder.description}\n\nEmergency Helpline: 8248349844`)}`}
+                    className="btn-secondary"
+                    style={{ textDecoration: 'none', padding: '12px 24px', fontSize: '0.9rem' }}
+                  >
+                    <span>Open in Mail App</span>
                   </a>
                   <button
                     onClick={() => {

@@ -250,11 +250,20 @@ export const CartDrawer = () => {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
                 <a
+                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=contact.cognisys@gmail.com&cc=${encodeURIComponent(completedOrder.customer_email)}&su=${encodeURIComponent(`[COGNISYS ORDER #${completedOrder.order_number}] - ${completedOrder.title || 'Service Purchase'}`)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nOrder Ref: #${completedOrder.order_number}\nClient: ${completedOrder.customer_name}\nEmail: ${completedOrder.customer_email}\nPhone: ${completedOrder.customer_phone}\n\nRequirements:\n${completedOrder.description || 'Project Order'}\n\nEmergency Helpline: +91 82483 49844`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary"
+                  style={{ width: '100%', padding: '12px', textAlign: 'center', textDecoration: 'none', display: 'block', fontSize: '0.86rem' }}
+                >
+                  <span>Send via Gmail Web</span>
+                </a>
+                <a
                   href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(completedOrder.customer_email)}&subject=${encodeURIComponent(`[COGNISYS ORDER #${completedOrder.order_number}] - ${completedOrder.title || 'Service Purchase'}`)}&body=${encodeURIComponent(`Order #${completedOrder.order_number}\nClient: ${completedOrder.customer_name} (${completedOrder.customer_email} | ${completedOrder.customer_phone})\n\nRequirements:\n${completedOrder.description || 'Project Order'}\n\nEmergency Helpline: 8248349844`)}`}
                   className="btn-secondary"
                   style={{ width: '100%', padding: '12px', textAlign: 'center', textDecoration: 'none', display: 'block', fontSize: '0.86rem' }}
                 >
-                  <span>Open in Mail App (CC to you)</span>
+                  <span>Open in Mail App</span>
                 </a>
                 <button
                   onClick={() => {
