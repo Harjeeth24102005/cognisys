@@ -17,6 +17,12 @@ export const EMAIL_API_CONFIG = {
   // Official direct emergency helpline
   helplinePhone: '8248349844',
 
+  // Resend API (resend.com)
+  resend: {
+    apiKey: import.meta.env.VITE_RESEND_API_KEY || '',
+    from: import.meta.env.VITE_RESEND_FROM || 'Cognisys <onboarding@resend.dev>'
+  },
+
   // Web3Forms API (Instant JSON submission)
   web3Forms: {
     endpoint: 'https://api.web3forms.com/submit',
@@ -63,6 +69,86 @@ function sanitize(input) {
       }
     })
     .trim();
+}
+
+/**
+ * Dispatches via Resend API (Vite proxy and direct fallback)
+ */
+async function dispatchViaResend(payload) {
+  const apiKey = (EMAIL_API_CONFIG.resend.apiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('cognisys_resend_key') : '') || '').trim();
+  if (!apiKey) {
+    return { success: false, provider: 'Resend', error: 'VITE_RESEND_API_KEY is not configured in .env' };
+  }
+
+  const clientEmail = payload.email || payload.customer_email || 'client@cognisys.ai';
+  const clientName = payload.name || payload.customer_name || 'Valued Client';
+  const subject = payload._subject || payload.subject || 'Website Inquiry';
+  const message = payload.message || payload.description || payload.inquiry_details || '';
+
+  const htmlContent = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; background: #ffffff;">
+      <div style="border-bottom: 2px solid #0284c7; padding-bottom: 12px; margin-bottom: 20px;">
+        <h2 style="color: #0284c7; margin: 0; font-size: 1.4rem;">Cognisys Specification Transmission</h2>
+        <span style="font-size: 0.8rem; color: #64748b;">Automated Direct Dispatch via Resend</span>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 140px;">Client Name:</td><td style="padding: 6px 0; color: #0b132b; font-weight: 700;">${clientName}</td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Client Email:</td><td style="padding: 6px 0;"><a href="mailto:${clientEmail}" style="color: #0284c7; font-weight: 600;">${clientEmail}</a></td></tr>
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Phone:</td><td style="padding: 6px 0; color: #0b132b;">${payload.phone || payload.customer_phone || 'Not provided'}</td></tr>
+        ${payload.order_number ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Order Ref:</td><td style="padding: 6px 0; color: #0284c7; font-weight: 700;">#${payload.order_number}</td></tr>` : ''}
+        ${payload.service_domain || payload.service_name ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Service:</td><td style="padding: 6px 0; color: #0b132b;">${payload.service_domain || payload.service_name}</td></tr>` : ''}
+        ${payload.estimated_budget || payload.budget ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Budget:</td><td style="padding: 6px 0; color: #059669; font-weight: 700;">${payload.estimated_budget || payload.budget}</td></tr>` : ''}
+        ${payload.target_delivery || payload.timeline ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Timeline:</td><td style="padding: 6px 0; color: #0b132b;">${payload.target_delivery || payload.timeline}</td></tr>` : ''}
+        ${payload.configured_items && payload.configured_items !== 'None' ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Configured Add-ons:</td><td style="padding: 6px 0; color: #0b132b;">${payload.configured_items}</td></tr>` : ''}
+        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Subject:</td><td style="padding: 6px 0; color: #0b132b; font-weight: 600;">${subject}</td></tr>
+      </table>
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Specifications &amp; Message:</div>
+        <div style="white-space: pre-line; color: #334155; font-size: 0.92rem;">${message || payload.specifications || 'No additional specifications provided.'}</div>
+      </div>
+      <div style="border-top: 1px solid #f1f5f9; padding-top: 14px; font-size: 0.78rem; color: #94a3b8; text-align: center;">
+        Cognisys Enterprise Systems • Delivered to ${EMAIL_API_CONFIG.receiverEmail} • Reply-To: ${clientEmail}
+      </div>
+    </div>
+  `;
+
+  const requestBody = {
+    from: EMAIL_API_CONFIG.resend.from || 'Cognisys <onboarding@resend.dev>',
+    to: [EMAIL_API_CONFIG.receiverEmail],
+    reply_to: clientEmail,
+    subject: `[COGNISYS] From ${clientName} (${clientEmail}) - ${subject}`,
+    html: htmlContent
+  };
+
+  const endpoints = [
+    '/api/resend/emails',
+    'https://api.resend.com/emails'
+  ];
+
+  let lastError = null;
+  for (const ep of endpoints) {
+    try {
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestBody)
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && (data.id || data.name !== 'validation_error')) {
+        return { success: true, provider: 'Resend', id: data.id };
+      } else {
+        lastError = data.message || `HTTP ${res.status}: ${res.statusText}`;
+      }
+    } catch (err) {
+      lastError = err.message;
+      console.warn(`[Resend] Attempt on ${ep} failed:`, err);
+    }
+  }
+
+  return { success: false, provider: 'Resend', error: lastError || 'Resend dispatch failed' };
 }
 
 /**
@@ -163,7 +249,17 @@ export const smtpService = {
     const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
     const fullSubject = `[COGNISYS CONTACT] ${subject} from ${clientName}`;
 
-    // 1. Try EmailJS
+    // 1. Try Resend API
+    const resendResult = await dispatchViaResend({
+      name: clientName,
+      email: clientEmail,
+      phone: clientPhone,
+      subject: subject,
+      message: message,
+      _subject: fullSubject
+    });
+
+    // 2. Try EmailJS
     const emailJsResult = await dispatchViaEmailJS(
       {
         to_email: EMAIL_API_CONFIG.receiverEmail,
@@ -239,11 +335,14 @@ export const smtpService = {
     // 5. Construct direct Gmail Web URL for instant 1-click dispatch without any third party
     const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nName: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nSubject: ${subject}\n\nMessage Details:\n${message}\n\nSubmitted on: ${dateStr}\nEmergency Hotline: +91 82483 49844`)}`;
 
-    const isDelivered = (emailJsResult && emailJsResult.success) || (web3Result && web3Result.success) || (staticResult && staticResult.success);
+    const isDelivered = (resendResult && resendResult.success) || (emailJsResult && emailJsResult.success) || (web3Result && web3Result.success) || (staticResult && staticResult.success);
 
     return {
       success: true,
       delivered: !!isDelivered,
+      deliveryId: resendResult?.id || null,
+      provider: isDelivered ? (resendResult?.success ? 'Resend' : (emailJsResult?.success ? 'EmailJS' : (web3Result?.success ? 'Web3Forms' : 'StaticForms'))) : null,
+      error: !isDelivered ? (resendResult?.error || 'Email dispatch failed') : null,
       inquiry: inquiryRecord,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,
@@ -282,7 +381,23 @@ export const smtpService = {
       } catch (e) {}
     }
 
-    // 1. EmailJS dispatch if configured
+    // 1. Try Resend API
+    const resendResult = await dispatchViaResend({
+      order_number: orderNumber,
+      client_name: clientName,
+      email: clientEmail,
+      phone: clientPhone,
+      service_domain: serviceName,
+      project_title: title,
+      specifications: description,
+      estimated_budget: budget,
+      target_delivery: timeline,
+      architecture_preference: tech,
+      configured_items: cartSummary,
+      _subject: fullSubject
+    });
+
+    // 2. EmailJS dispatch if configured
     const emailJsResult = await dispatchViaEmailJS(
       {
         to_email: EMAIL_API_CONFIG.receiverEmail,
@@ -384,11 +499,14 @@ export const smtpService = {
     // 5. Construct direct Gmail Web URL for instant 1-click dispatch
     const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nOrder Ref: #${orderNumber}\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nService: ${serviceName}\nProject Title: ${title}\nEstimated Budget: ${budget}\nTimeline: ${timeline}\nTech Preferences: ${tech}\nConfigured Add-ons: ${cartSummary}\n\nProject Specifications:\n${description}\n\nEmergency Helpline: +91 82483 49844`)}`;
 
-    const isDelivered = (emailJsResult && emailJsResult.success) || (web3Result && web3Result.success) || (staticResult && staticResult.success);
+    const isDelivered = (resendResult && resendResult.success) || (emailJsResult && emailJsResult.success) || (web3Result && web3Result.success) || (staticResult && staticResult.success);
 
     return {
       success: true,
       delivered: !!isDelivered,
+      deliveryId: resendResult?.id || null,
+      provider: isDelivered ? (resendResult?.success ? 'Resend' : (emailJsResult?.success ? 'EmailJS' : (web3Result?.success ? 'Web3Forms' : 'StaticForms'))) : null,
+      error: !isDelivered ? (resendResult?.error || 'Email dispatch failed') : null,
       order: createdOrder,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,

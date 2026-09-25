@@ -244,61 +244,122 @@ export const Contact = () => {
             <div className="glass-panel" style={{ padding: 'clamp(24px, 5vw, 40px)', background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.1)', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.06)' }}>
               {submitted ? (
                 <div style={{ textAlign: 'center', padding: '36px 0' }}>
-                  <div style={{
-                    width: '68px',
-                    height: '68px',
-                    borderRadius: '50%',
-                    background: 'rgba(16, 185, 129, 0.12)',
-                    border: '2px solid #10B981',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#10B981',
-                    margin: '0 auto 20px',
-                    boxShadow: '0 0 28px rgba(16, 185, 129, 0.25)'
-                  }}>
-                    <CheckCircle2 size={38} />
-                  </div>
-                  <h3 style={{ fontSize: '1.4rem', color: '#0B132B', fontWeight: 800, marginBottom: '8px' }}>
-                    Formal Inquiry Transmitted Successfully!
-                  </h3>
-                  <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '16px' }}>
-                    ✓ DELIVERED TO CONTACT.COGNISYS@GMAIL.COM &amp; AUTO-CONFIRMED TO SENDER
-                  </div>
+                  {smtpStatus?.delivered ? (
+                    <>
+                      <div style={{
+                        width: '72px',
+                        height: '72px',
+                        borderRadius: '50%',
+                        background: 'rgba(16, 185, 129, 0.12)',
+                        border: '2px solid #10B981',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#10B981',
+                        margin: '0 auto 20px',
+                        boxShadow: '0 0 28px rgba(16, 185, 129, 0.3)'
+                      }}>
+                        <CheckCircle2 size={38} />
+                      </div>
+                      <h3 style={{ fontSize: '1.4rem', color: '#0B132B', fontWeight: 800, marginBottom: '8px' }}>
+                        Inquiry Delivered Directly!
+                      </h3>
+                      <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '16px' }}>
+                        ✓ DELIVERED VIA RESEND TO CONTACT.COGNISYS@GMAIL.COM
+                      </div>
 
-                  {/* Formal Transmission Status Box */}
-                  <div style={{
-                    background: '#F0FDF4',
-                    border: '1px solid #BBF7D0',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '16px 20px',
-                    textAlign: 'left',
-                    marginBottom: '20px',
-                    fontSize: '0.9rem',
-                    color: '#166534',
-                    lineHeight: 1.6
-                  }}>
-                    <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
-                      The mail is sent to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details.
-                    </p>
-                    <p style={{ margin: '0 0 10px 0' }}>
-                      A confirmation has also been dispatched to your email address (<strong>{formData.email}</strong>). The Cognisys technical team will review your requirements and contact you soon.
-                    </p>
-                    <div style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #86EFAC',
-                      borderRadius: '8px',
-                      padding: '10px 14px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      fontWeight: 700,
-                      color: '#0F172A'
-                    }}>
-                      <Phone size={18} color="#059669" />
-                      <span>If you need immediate assistance now, call: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
-                    </div>
-                  </div>
+                      <div style={{
+                        background: '#F0FDF4',
+                        border: '1px solid #BBF7D0',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '16px 20px',
+                        textAlign: 'left',
+                        marginBottom: '20px',
+                        fontSize: '0.9rem',
+                        color: '#166534',
+                        lineHeight: 1.6
+                      }}>
+                        <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
+                          The mail has been delivered to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details.
+                        </p>
+                        <p style={{ margin: '0 0 10px 0' }}>
+                          Client reply email: <strong>{formData.email}</strong>. The Cognisys technical team will review your specifications and contact you soon.
+                        </p>
+                        <div style={{
+                          background: '#FFFFFF',
+                          border: '1px solid #86EFAC',
+                          borderRadius: '8px',
+                          padding: '10px 14px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          fontWeight: 700,
+                          color: '#0F172A'
+                        }}>
+                          <Phone size={18} color="#059669" />
+                          <span>Immediate assistance hotline: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{
+                        width: '72px',
+                        height: '72px',
+                        borderRadius: '50%',
+                        background: 'rgba(2, 132, 199, 0.1)',
+                        border: '2px solid #0284C7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#0284C7',
+                        margin: '0 auto 20px',
+                        boxShadow: '0 0 28px rgba(2, 132, 199, 0.25)'
+                      }}>
+                        <Mail size={36} />
+                      </div>
+                      <h3 style={{ fontSize: '1.4rem', color: '#0B132B', fontWeight: 800, marginBottom: '8px' }}>
+                        Inquiry Specifications Ready
+                      </h3>
+                      <div style={{ display: 'inline-block', background: 'rgba(234, 88, 12, 0.1)', color: '#C2410C', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '16px' }}>
+                        READY FOR DISPATCH TO CONTACT.COGNISYS@GMAIL.COM
+                      </div>
+
+                      <div style={{
+                        background: '#FFF7ED',
+                        border: '1px solid #FED7AA',
+                        borderRadius: 'var(--radius-md)',
+                        padding: '16px 20px',
+                        textAlign: 'left',
+                        marginBottom: '20px',
+                        fontSize: '0.9rem',
+                        color: '#9A3412',
+                        lineHeight: 1.6
+                      }}>
+                        <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
+                          Automatic email dispatch requires a Resend API key ({smtpStatus?.error || 'VITE_RESEND_API_KEY missing in .env'}).
+                        </p>
+                        <p style={{ margin: '0 0 10px 0' }}>
+                          Click the button below to send this message directly to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span>:
+                        </p>
+                        <div style={{
+                          background: '#FFFFFF',
+                          border: '1px solid #FDBA74',
+                          borderRadius: '8px',
+                          padding: '10px 14px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          fontWeight: 700,
+                          color: '#0F172A',
+                          marginTop: '8px'
+                        }}>
+                          <Phone size={18} color="#EA580C" />
+                          <span>Direct Phone: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   {/* Summary of Transmitted Fields */}
                   <div style={{
@@ -332,31 +393,35 @@ export const Contact = () => {
                   </div>
 
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <a
-                      href={`https://mail.google.com/mail/?view=cm&fs=1&to=contact.cognisys@gmail.com&cc=${encodeURIComponent(formData.email)}&su=${encodeURIComponent(`[COGNISYS INQUIRY] ${formData.subject || 'Website Message'} from ${formData.name}`)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nSubject: ${formData.subject}\n\nMessage Details:\n${formData.message}\n\nEmergency Helpline: +91 82483 49844`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-primary"
-                      style={{ textDecoration: 'none', padding: '12px 22px', fontSize: '0.88rem' }}
-                    >
-                      <span>Send via Gmail Web</span>
-                    </a>
-                    <a
-                      href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(formData.email)}&subject=${encodeURIComponent(`[COGNISYS] ${formData.subject || `Inquiry from ${formData.name}`}`)}&body=${encodeURIComponent(`Dear Cognisys Team,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage Details:\n${formData.message}\n\nEmergency Helpline: 8248349844`)}`}
-                      className="btn-secondary"
-                      style={{ textDecoration: 'none', padding: '12px 20px', fontSize: '0.88rem' }}
-                    >
-                      <span>Open in Mail App</span>
-                    </a>
+                    {!smtpStatus?.delivered && (
+                      <>
+                        <a
+                          href={`https://mail.google.com/mail/?view=cm&fs=1&to=contact.cognisys@gmail.com&cc=${encodeURIComponent(formData.email)}&su=${encodeURIComponent(`[COGNISYS INQUIRY] ${formData.subject || 'Website Message'} from ${formData.name}`)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nSubject: ${formData.subject}\n\nMessage Details:\n${formData.message}\n\nEmergency Helpline: +91 82483 49844`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn-primary"
+                          style={{ textDecoration: 'none', padding: '12px 22px', fontSize: '0.88rem' }}
+                        >
+                          <span>Send via Gmail Web</span>
+                        </a>
+                        <a
+                          href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(formData.email)}&subject=${encodeURIComponent(`[COGNISYS] ${formData.subject || `Inquiry from ${formData.name}`}`)}&body=${encodeURIComponent(`Dear Cognisys Team,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage Details:\n${formData.message}\n\nEmergency Helpline: 8248349844`)}`}
+                          className="btn-secondary"
+                          style={{ textDecoration: 'none', padding: '12px 20px', fontSize: '0.88rem' }}
+                        >
+                          <span>Open in Mail App</span>
+                        </a>
+                      </>
+                    )}
                     <button
                       onClick={() => {
                         setSubmitted(false);
                         setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
                       }}
-                      className="btn-secondary"
+                      className={smtpStatus?.delivered ? 'btn-primary' : 'btn-secondary'}
                       style={{ padding: '12px 20px', fontSize: '0.88rem' }}
                     >
-                      Send Another Message
+                      {smtpStatus?.delivered ? 'Send Another Inquiry' : 'Edit Inquiry'}
                     </button>
                   </div>
                 </div>

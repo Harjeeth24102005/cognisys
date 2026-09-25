@@ -142,13 +142,15 @@ export const OrderWizard = () => {
       const newOrder = res.order;
       setSubmittedOrder(newOrder);
       setSmtpStatus(res);
-      try {
-        confetti({
-          particleCount: 140,
-          spread: 80,
-          origin: { y: 0.55 }
-        });
-      } catch (err) {}
+      if (res.delivered) {
+        try {
+          confetti({
+            particleCount: 140,
+            spread: 80,
+            origin: { y: 0.55 }
+          });
+        } catch (err) {}
+      }
 
       // Order successfully submitted and dispatched via direct mail relay
     } catch (err) {
@@ -181,63 +183,126 @@ export const OrderWizard = () => {
           <div className="glass-panel" style={{ padding: 'clamp(24px, 5vw, 44px)', position: 'relative', background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
             {submittedOrder ? (
               <div style={{ textAlign: 'center', padding: '36px 12px' }}>
-                <div style={{
-                  width: '80px',
-                  height: '80px',
-                  borderRadius: '50%',
-                  background: 'rgba(16, 185, 129, 0.12)',
-                  border: '2px solid #10B981',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#10B981',
-                  margin: '0 auto 24px',
-                  boxShadow: '0 0 32px rgba(16, 185, 129, 0.35)'
-                }}>
-                  <CheckCircle2 size={44} />
-                </div>
+                {smtpStatus?.delivered ? (
+                  <>
+                    <div style={{
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '50%',
+                      background: 'rgba(16, 185, 129, 0.12)',
+                      border: '2px solid #10B981',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#10B981',
+                      margin: '0 auto 24px',
+                      boxShadow: '0 0 32px rgba(16, 185, 129, 0.35)'
+                    }}>
+                      <CheckCircle2 size={44} />
+                    </div>
 
-                <h2 style={{ fontSize: '1.8rem', color: '#0B132B', marginBottom: '8px', fontWeight: 900 }}>
-                  Formal Specifications Transmitted Successfully!
-                </h2>
-                <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '18px' }}>
-                  ✓ DELIVERED TO CONTACT.COGNISYS@GMAIL.COM &amp; AUTO-CONFIRMED TO SENDER
-                </div>
+                    <h2 style={{ fontSize: '1.8rem', color: '#0B132B', marginBottom: '8px', fontWeight: 900 }}>
+                      Formal Specifications Delivered Successfully!
+                    </h2>
+                    <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '18px' }}>
+                      ✓ DELIVERED TO CONTACT.COGNISYS@GMAIL.COM
+                    </div>
 
-                {/* Formal Transmission Status Box */}
-                <div style={{
-                  background: '#F0FDF4',
-                  border: '1px solid #BBF7D0',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '18px 22px',
-                  maxWidth: '560px',
-                  margin: '0 auto 24px',
-                  textAlign: 'left',
-                  fontSize: '0.9rem',
-                  color: '#166534',
-                  lineHeight: 1.6
-                }}>
-                  <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
-                    The mail is sent to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details for <strong>{submittedOrder.title}</strong>.
-                  </p>
-                  <p style={{ margin: '0 0 12px 0' }}>
-                    A confirmation has also been dispatched to your email address (<strong>{submittedOrder.customer_email}</strong>). The Cognisys technical team will review your specifications and contact you soon.
-                  </p>
-                  <div style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #86EFAC',
-                    borderRadius: '8px',
-                    padding: '10px 14px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    fontWeight: 700,
-                    color: '#0F172A'
-                  }}>
-                    <Phone size={18} color="#059669" />
-                    <span>If you need immediate assistance now, call: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
-                  </div>
-                </div>
+                    <div style={{
+                      background: '#F0FDF4',
+                      border: '1px solid #BBF7D0',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '18px 22px',
+                      maxWidth: '560px',
+                      margin: '0 auto 24px',
+                      textAlign: 'left',
+                      fontSize: '0.9rem',
+                      color: '#166534',
+                      lineHeight: 1.6
+                    }}>
+                      <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
+                        The mail has been delivered to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details for <strong>{submittedOrder.title}</strong>.
+                      </p>
+                      <p style={{ margin: '0 0 12px 0' }}>
+                        The Cognisys technical team will review your specifications and contact you soon at <strong>{submittedOrder.customer_email}</strong>.
+                      </p>
+                      <div style={{
+                        background: '#FFFFFF',
+                        border: '1px solid #86EFAC',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        fontWeight: 700,
+                        color: '#0F172A'
+                      }}>
+                        <Phone size={18} color="#059669" />
+                        <span>If you need immediate assistance now, call: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '50%',
+                      background: 'rgba(2, 132, 199, 0.12)',
+                      border: '2px solid #0284C7',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: '#0284C7',
+                      margin: '0 auto 24px',
+                      boxShadow: '0 0 32px rgba(2, 132, 199, 0.25)'
+                    }}>
+                      <FileText size={44} />
+                    </div>
+
+                    <h2 style={{ fontSize: '1.8rem', color: '#0B132B', marginBottom: '8px', fontWeight: 900 }}>
+                      Project Specifications Ready
+                    </h2>
+                    <div style={{ display: 'inline-block', background: 'rgba(234, 88, 12, 0.1)', color: '#C2410C', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '18px' }}>
+                      READY FOR DISPATCH TO CONTACT.COGNISYS@GMAIL.COM
+                    </div>
+
+                    <div style={{
+                      background: '#FFF7ED',
+                      border: '1px solid #FED7AA',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '18px 22px',
+                      maxWidth: '560px',
+                      margin: '0 auto 24px',
+                      textAlign: 'left',
+                      fontSize: '0.9rem',
+                      color: '#9A3412',
+                      lineHeight: 1.6
+                    }}>
+                      <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
+                        Automatic email dispatch requires a Resend API key ({smtpStatus?.error || 'VITE_RESEND_API_KEY missing in .env'}).
+                      </p>
+                      <p style={{ margin: '0 0 10px 0' }}>
+                        Your specifications are configured! Click <strong>"Send via Gmail Web"</strong> below to send directly to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span>:
+                      </p>
+                      <div style={{
+                        background: '#FFFFFF',
+                        border: '1px solid #FDBA74',
+                        borderRadius: '8px',
+                        padding: '10px 14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        fontWeight: 700,
+                        color: '#0F172A',
+                        marginTop: '8px'
+                      }}>
+                        <Phone size={18} color="#EA580C" />
+                        <span>Direct Engineering Line: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div style={{
                   background: '#F8FAFC',
