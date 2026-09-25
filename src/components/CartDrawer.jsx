@@ -75,9 +75,12 @@ export const CartDrawer = () => {
             origin: { y: 0.5 }
           });
         } catch (err) {}
+      } else if (orderResult && orderResult.needsActivation) {
+        setPurchaseSuccess(false);
+        setError('FormSubmit 1-time activation pending: Please check contact.cognisys@gmail.com and click the blue "ACTIVATE FORM" button (from submissions@formsubmit.co). Once activated, all submissions deliver automatically!');
       } else {
         setPurchaseSuccess(false);
-        setError(orderResult?.error || 'Email was NOT sent. Resend API Key is missing in .env.');
+        setError(orderResult?.error || 'Unable to transmit specifications automatically. Please use the direct transmission option.');
       }
 
       // Order successfully submitted and dispatched via direct mail relay
@@ -186,7 +189,7 @@ export const CartDrawer = () => {
                     <CheckCircle2 size={38} />
                   </div>
                   <h3 style={{ fontSize: '1.4rem', color: '#0B132B', marginBottom: '8px', fontWeight: 800 }}>
-                    Order Delivered via Resend API!
+                    Order Delivered Successfully!
                   </h3>
                   <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.75rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '14px' }}>
                     ✓ DELIVERED TO CONTACT.COGNISYS@GMAIL.COM
@@ -262,7 +265,9 @@ export const CartDrawer = () => {
                     lineHeight: 1.5
                   }}>
                     <p style={{ margin: '0 0 6px 0', fontWeight: 700 }}>
-                      Automatic email dispatch requires a Resend API key ({dispatchStatus?.error || 'VITE_RESEND_API_KEY missing in .env'}).
+                      {dispatchStatus?.needsActivation 
+                        ? 'FormSubmit activation pending: Please click the blue "ACTIVATE FORM" button in the email sent to contact.cognisys@gmail.com.' 
+                        : (dispatchStatus?.error || 'All specifications are configured and ready for direct dispatch.')}
                     </p>
                     <p style={{ margin: '0 0 10px 0' }}>
                       Click <strong>"Send via Gmail Web"</strong> below to send all specifications directly to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span>:

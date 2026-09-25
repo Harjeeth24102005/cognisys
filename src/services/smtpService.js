@@ -17,6 +17,12 @@ export const EMAIL_API_CONFIG = {
   // Official direct emergency helpline
   helplinePhone: '8248349844',
 
+  // FormSubmit (Direct zero-registration dispatch using token ae72526f8eca0a28ed579f0d030d8f9e)
+  formSubmit: {
+    token: 'ae72526f8eca0a28ed579f0d030d8f9e',
+    endpoint: 'https://formsubmit.co/ajax/ae72526f8eca0a28ed579f0d030d8f9e'
+  },
+
   // Resend API (resend.com)
   resend: {
     apiKey: import.meta.env.VITE_RESEND_API_KEY || '',
@@ -69,6 +75,81 @@ function sanitize(input) {
       }
     })
     .trim();
+}
+
+/**
+ * Dispatches via FormSubmit API (Zero-config direct dispatch to contact.cognisys@gmail.com)
+ * Uses verified token ae72526f8eca0a28ed579f0d030d8f9e
+ */
+/**
+ * Dispatches via FormSubmit API (Zero-config direct dispatch to contact.cognisys@gmail.com)
+ * Uses verified token ae72526f8eca0a28ed579f0d030d8f9e
+ */
+async function dispatchViaFormSubmit(payload) {
+  const token = EMAIL_API_CONFIG.formSubmit.token || 'ae72526f8eca0a28ed579f0d030d8f9e';
+  const endpoint = `https://formsubmit.co/ajax/${token}`;
+
+  const clientEmail = payload.email || payload.customer_email || 'client@cognisys.ai';
+  const clientName = payload.name || payload.customer_name || 'Valued Client';
+  const orderNumber = payload.order_number || `COG-2026-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
+  const title = payload.project_title || payload.title || payload.subject || 'Website Inquiry';
+  const subject = payload.subject || payload._subject || payload.title || 'General Inquiry';
+  const serviceName = payload.service_domain || payload.service_name || 'General / Custom Engineering';
+  const message = payload.message || payload.description || payload.specifications || payload.inquiry_details || 'No additional specifications provided.';
+  const budget = payload.estimated_budget || payload.budget || 'Custom Quotation';
+  const timeline = payload.target_delivery || payload.timeline || 'Direct Inquiry';
+  const techPreferences = payload.architecture_preference || payload.tech_preferences || 'Recommended Architecture';
+  const phone = payload.phone || payload.customer_phone || 'Not provided';
+  const dateStr = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+
+  const fullSubject = payload._subject || `[COGNISYS] ${title} - ${clientName}`;
+
+  // FormSubmit payload: all key-value pairs are formatted into the email table delivered directly to contact.cognisys@gmail.com
+  const requestBody = {
+    _subject: fullSubject,
+    _replyto: clientEmail,
+    _captcha: 'false',
+    _template: 'table',
+    'Order / Reference ID': `#${orderNumber}`,
+    'Submission Date & Time': dateStr,
+    'Client Full Name': clientName,
+    'Client Email': clientEmail,
+    'Client Phone Number': phone,
+    'Service / Domain': serviceName,
+    'Project Title / Subject': title,
+    'Requirements & Specifications': message,
+    'Estimated Budget': budget,
+    'Target Delivery Timeline': timeline,
+    'Technology Preferences': techPreferences,
+    'Configured Add-ons & Catalog Items': payload.configured_items || payload.cart_summary || 'None'
+  };
+
+  try {
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(requestBody)
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.success === 'true' || data.success === true) {
+      return { success: true, provider: 'FormSubmit', message: data.message || 'Delivered to contact.cognisys@gmail.com' };
+    }
+    if (data.message && data.message.toLowerCase().includes('activation')) {
+      return {
+        success: false,
+        needsActivation: true,
+        provider: 'FormSubmit',
+        message: data.message
+      };
+    }
+    return { success: false, provider: 'FormSubmit', error: data.message || 'Transmission failed' };
+  } catch (err) {
+    console.warn('[FormSubmit] Fetch error:', err);
+    return { success: false, provider: 'FormSubmit', error: err.message };
+  }
 }
 
 /**
@@ -329,69 +410,47 @@ export const smtpService = {
     const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
     const fullSubject = `[COGNISYS CONTACT] ${subject} from ${clientName}`;
 
-    // 1. Try Resend API
-    const resendResult = await dispatchViaResend({
+    // 1. PRIMARY: FormSubmit (Zero-config direct dispatch to contact.cognisys@gmail.com)
+    const formSubmitResult = await dispatchViaFormSubmit({
       name: clientName,
       email: clientEmail,
       phone: clientPhone,
       subject: subject,
       message: message,
+      service_domain: 'General / Contact Inquiry',
+      project_title: subject,
       _subject: fullSubject
     });
 
-    // 2. Try EmailJS
-    const emailJsResult = await dispatchViaEmailJS(
-      {
-        to_email: EMAIL_API_CONFIG.receiverEmail,
-        receiver_email: EMAIL_API_CONFIG.receiverEmail,
-        client_name: clientName,
-        from_name: clientName,
+    // 2. Secondary fallback: Resend API if configured
+    let resendResult = null;
+    if (!formSubmitResult || !formSubmitResult.success) {
+      resendResult = await dispatchViaResend({
         name: clientName,
-        client_email: clientEmail,
-        from_email: clientEmail,
         email: clientEmail,
-        reply_to: clientEmail,
-        client_phone: clientPhone,
         phone: clientPhone,
-        subject: fullSubject,
+        subject: subject,
         message: message,
-        inquiry_details: message,
-        submitted_at: dateStr,
-        helpline_phone: EMAIL_API_CONFIG.helplinePhone
-      },
-      {
-        to_email: clientEmail,
-        client_name: clientName,
+        _subject: fullSubject
+      });
+    }
+
+    // 3. Fallback: Web3Forms if configured
+    let web3Result = null;
+    if ((!formSubmitResult || !formSubmitResult.success) && (!resendResult || !resendResult.success)) {
+      web3Result = await dispatchViaWeb3Forms({
         name: clientName,
-        to_name: clientName,
-        helpline_phone: EMAIL_API_CONFIG.helplinePhone,
-        receiver_email: EMAIL_API_CONFIG.receiverEmail,
-        autoresponder_message: getAutoresponderMessage(clientName)
-      }
-    );
-
-    // 2. Try Web3Forms
-    const web3Result = await dispatchViaWeb3Forms({
-      name: clientName,
-      email: clientEmail,
-      phone: clientPhone,
-      subject: subject,
-      message: message,
-      submitted_on: dateStr,
-      receiver: EMAIL_API_CONFIG.receiverEmail,
-      emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
-      _subject: fullSubject,
-      _replyto: clientEmail
-    });
-
-    // 3. Try StaticForms
-    const staticResult = await dispatchViaStaticForms({
-      name: clientName,
-      email: clientEmail,
-      phone: clientPhone,
-      subject: fullSubject,
-      message: message
-    });
+        email: clientEmail,
+        phone: clientPhone,
+        subject: subject,
+        message: message,
+        submitted_on: dateStr,
+        receiver: EMAIL_API_CONFIG.receiverEmail,
+        emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
+        _subject: fullSubject,
+        _replyto: clientEmail
+      });
+    }
 
     // 4. Local persistence
     const inquiryRecord = {
@@ -415,14 +474,23 @@ export const smtpService = {
     // 5. Construct direct Gmail Web URL for instant 1-click dispatch without any third party
     const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nName: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nSubject: ${subject}\n\nMessage Details:\n${message}\n\nSubmitted on: ${dateStr}\nEmergency Hotline: +91 82483 49844`)}`;
 
-    const isDelivered = (resendResult && resendResult.success) || (emailJsResult && emailJsResult.success) || (web3Result && web3Result.success) || (staticResult && staticResult.success);
+    const isDelivered = (formSubmitResult && formSubmitResult.success) || 
+                        (resendResult && resendResult.success) || 
+                        (web3Result && web3Result.success);
+
+    const activeProvider = (formSubmitResult && formSubmitResult.success) ? 'FormSubmit' :
+                           (resendResult && resendResult.success) ? 'Resend' :
+                           (web3Result && web3Result.success) ? 'Web3Forms' : null;
+
+    const needsActivation = !!formSubmitResult?.needsActivation;
 
     return {
       success: true,
       delivered: !!isDelivered,
-      deliveryId: resendResult?.id || null,
-      provider: isDelivered ? (resendResult?.success ? 'Resend' : (emailJsResult?.success ? 'EmailJS' : (web3Result?.success ? 'Web3Forms' : 'StaticForms'))) : null,
-      error: !isDelivered ? (resendResult?.error || 'Email dispatch failed') : null,
+      needsActivation: needsActivation,
+      provider: activeProvider,
+      deliveryId: formSubmitResult?.success ? 'FS-OK' : (resendResult?.id || null),
+      error: !isDelivered ? (needsActivation ? 'FormSubmit activation required. Please click "Activate Form" in the email sent to contact.cognisys@gmail.com.' : (formSubmitResult?.error || 'Email dispatch failed')) : null,
       inquiry: inquiryRecord,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,
@@ -461,10 +529,10 @@ export const smtpService = {
       } catch (e) {}
     }
 
-    // 1. Try Resend API
-    const resendResult = await dispatchViaResend({
+    // 1. PRIMARY: FormSubmit (Zero-config direct dispatch to contact.cognisys@gmail.com)
+    const formSubmitResult = await dispatchViaFormSubmit({
       order_number: orderNumber,
-      client_name: clientName,
+      name: clientName,
       email: clientEmail,
       phone: clientPhone,
       service_domain: serviceName,
@@ -472,82 +540,52 @@ export const smtpService = {
       specifications: description,
       estimated_budget: budget,
       target_delivery: timeline,
-      architecture_preference: tech,
+      tech_preferences: tech,
       configured_items: cartSummary,
       _subject: fullSubject
     });
 
-    // 2. EmailJS dispatch if configured
-    const emailJsResult = await dispatchViaEmailJS(
-      {
-        to_email: EMAIL_API_CONFIG.receiverEmail,
-        receiver_email: EMAIL_API_CONFIG.receiverEmail,
+    // 2. Secondary fallback: Resend API if configured
+    let resendResult = null;
+    if (!formSubmitResult || !formSubmitResult.success) {
+      resendResult = await dispatchViaResend({
         order_number: orderNumber,
         client_name: clientName,
-        from_name: clientName,
-        name: clientName,
-        client_email: clientEmail,
-        from_email: clientEmail,
         email: clientEmail,
-        reply_to: clientEmail,
-        client_phone: clientPhone,
         phone: clientPhone,
-        service_name: serviceName,
+        service_domain: serviceName,
         project_title: title,
-        title: title,
-        description: description,
-        message: description,
-        budget: budget,
-        timeline: timeline,
-        tech_preferences: tech,
-        cart_items: cartSummary,
-        submitted_at: dateStr,
-        helpline_phone: EMAIL_API_CONFIG.helplinePhone
-      },
-      {
-        to_email: clientEmail,
-        client_name: clientName,
-        name: clientName,
-        to_name: clientName,
+        specifications: description,
+        estimated_budget: budget,
+        target_delivery: timeline,
+        architecture_preference: tech,
+        configured_items: cartSummary,
+        _subject: fullSubject
+      });
+    }
+
+    // 3. Fallback: Web3Forms if configured
+    let web3Result = null;
+    if ((!formSubmitResult || !formSubmitResult.success) && (!resendResult || !resendResult.success)) {
+      web3Result = await dispatchViaWeb3Forms({
         order_number: orderNumber,
-        helpline_phone: EMAIL_API_CONFIG.helplinePhone,
-        receiver_email: EMAIL_API_CONFIG.receiverEmail,
-        autoresponder_message: getAutoresponderMessage(clientName)
-      }
-    );
-
-    // 2. Web3Forms dispatch
-    const web3Result = await dispatchViaWeb3Forms({
-      order_number: orderNumber,
-      name: clientName,
-      email: clientEmail,
-      phone: clientPhone,
-      service_domain: serviceName,
-      project_title: title,
-      specifications: description,
-      estimated_budget: budget,
-      target_delivery: timeline,
-      architecture_preference: tech,
-      configured_items: cartSummary,
-      submitted_on: dateStr,
-      receiver: EMAIL_API_CONFIG.receiverEmail,
-      emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
-      _subject: fullSubject,
-      _replyto: clientEmail
-    });
-
-    // 3. StaticForms dispatch
-    const staticResult = await dispatchViaStaticForms({
-      order_number: orderNumber,
-      name: clientName,
-      email: clientEmail,
-      phone: clientPhone,
-      service: serviceName,
-      title: title,
-      description: description,
-      budget: budget,
-      timeline: timeline
-    });
+        name: clientName,
+        email: clientEmail,
+        phone: clientPhone,
+        service_domain: serviceName,
+        project_title: title,
+        specifications: description,
+        estimated_budget: budget,
+        target_delivery: timeline,
+        architecture_preference: tech,
+        configured_items: cartSummary,
+        submitted_on: dateStr,
+        receiver: EMAIL_API_CONFIG.receiverEmail,
+        emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
+        _subject: fullSubject,
+        _replyto: clientEmail
+      });
+    }
 
     // 4. Local persistence
     const createdOrder = {
@@ -579,14 +617,23 @@ export const smtpService = {
     // 5. Construct direct Gmail Web URL for instant 1-click dispatch
     const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nOrder Ref: #${orderNumber}\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nService: ${serviceName}\nProject Title: ${title}\nEstimated Budget: ${budget}\nTimeline: ${timeline}\nTech Preferences: ${tech}\nConfigured Add-ons: ${cartSummary}\n\nProject Specifications:\n${description}\n\nEmergency Helpline: +91 82483 49844`)}`;
 
-    const isDelivered = (resendResult && resendResult.success) || (emailJsResult && emailJsResult.success) || (web3Result && web3Result.success) || (staticResult && staticResult.success);
+    const isDelivered = (formSubmitResult && formSubmitResult.success) || 
+                        (resendResult && resendResult.success) || 
+                        (web3Result && web3Result.success);
+
+    const activeProvider = (formSubmitResult && formSubmitResult.success) ? 'FormSubmit' :
+                           (resendResult && resendResult.success) ? 'Resend' :
+                           (web3Result && web3Result.success) ? 'Web3Forms' : null;
+
+    const needsActivation = !!formSubmitResult?.needsActivation;
 
     return {
       success: true,
       delivered: !!isDelivered,
-      deliveryId: resendResult?.id || null,
-      provider: isDelivered ? (resendResult?.success ? 'Resend' : (emailJsResult?.success ? 'EmailJS' : (web3Result?.success ? 'Web3Forms' : 'StaticForms'))) : null,
-      error: !isDelivered ? (resendResult?.error || 'Email dispatch failed') : null,
+      needsActivation: needsActivation,
+      provider: activeProvider,
+      deliveryId: formSubmitResult?.success ? 'FS-OK' : (resendResult?.id || null),
+      error: !isDelivered ? (needsActivation ? 'FormSubmit activation required. Please click "Activate Form" in the email sent to contact.cognisys@gmail.com.' : (formSubmitResult?.error || 'Email dispatch failed')) : null,
       order: createdOrder,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,

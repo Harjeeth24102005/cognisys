@@ -151,9 +151,12 @@ export const OrderWizard = () => {
             origin: { y: 0.55 }
           });
         } catch (err) {}
+      } else if (res && res.needsActivation) {
+        setSubmittedOrder(null);
+        setError('FormSubmit 1-time activation pending: Please check contact.cognisys@gmail.com and click the blue "ACTIVATE FORM" button (from submissions@formsubmit.co). Once activated, all submissions deliver automatically!');
       } else {
         setSubmittedOrder(null);
-        setError(res?.error || 'Email was NOT sent. Resend API Key is missing in .env.');
+        setError(res?.error || 'Unable to transmit specifications automatically. Please use the direct transmission option.');
       }
 
       // Order successfully submitted and dispatched via direct mail relay
@@ -284,7 +287,9 @@ export const OrderWizard = () => {
                       lineHeight: 1.6
                     }}>
                       <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
-                        Automatic email dispatch requires a Resend API key ({smtpStatus?.error || 'VITE_RESEND_API_KEY missing in .env'}).
+                        {smtpStatus?.needsActivation 
+                          ? 'FormSubmit activation pending: Please click the blue "ACTIVATE FORM" button in the email sent to contact.cognisys@gmail.com.' 
+                          : (smtpStatus?.error || 'All specifications are configured and ready for direct dispatch.')}
                       </p>
                       <p style={{ margin: '0 0 10px 0' }}>
                         Your specifications are configured! Click <strong>"Send via Gmail Web"</strong> below to send directly to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span>:

@@ -21,36 +21,6 @@ export const Contact = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [smtpStatus, setSmtpStatus] = useState(null);
-  const [inputApiKey, setInputApiKey] = useState('');
-  const [keySaving, setKeySaving] = useState(false);
-
-  const handleSaveKeyAndRetry = async (e) => {
-    if (e) e.preventDefault();
-    const key = inputApiKey.trim();
-    if (!key || !key.startsWith('re_')) {
-      setError('Please enter a valid Resend API Key starting with re_');
-      return;
-    }
-    setKeySaving(true);
-    try {
-      localStorage.setItem('cognisys_resend_key', key);
-      await fetch('/api/save-resend-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey: key })
-      }).catch(() => {});
-      setError(null);
-      // Trigger submission with new key
-      setTimeout(() => {
-        const fakeEvent = { preventDefault: () => {} };
-        handleSubmit(fakeEvent);
-      }, 100);
-    } catch (err) {
-      setError('Failed to save key: ' + err.message);
-    } finally {
-      setKeySaving(false);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -84,10 +54,12 @@ export const Contact = () => {
             origin: { y: 0.6 }
           });
         } catch (err) {}
-      } else {
-        // STRICT: Do NOT show message sent notification if email was NOT delivered!
+      } else if (smtpRes && smtpRes.needsActivation) {
         setSubmitted(false);
-        setError(smtpRes?.error || 'Email was NOT sent. Resend API Key is missing in .env.');
+        setError('FormSubmit 1-time activation pending: Please check contact.cognisys@gmail.com and click the blue "ACTIVATE FORM" button (from submissions@formsubmit.co). Once activated, all submissions deliver automatically!');
+      } else {
+        setSubmitted(false);
+        setError(smtpRes?.error || 'Unable to transmit inquiry automatically. You can send directly using Gmail below.');
       }
     } catch (err) {
       console.warn('Inquiry dispatch note:', err);
@@ -304,7 +276,7 @@ export const Contact = () => {
                         Inquiry Delivered Directly!
                       </h3>
                       <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '16px' }}>
-                        ✓ DELIVERED VIA RESEND TO CONTACT.COGNISYS@GMAIL.COM
+                        ✓ DELIVERED TO CONTACT.COGNISYS@GMAIL.COM
                       </div>
 
                       <div style={{
@@ -376,7 +348,9 @@ export const Contact = () => {
                         lineHeight: 1.6
                       }}>
                         <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
-                          Automatic email dispatch requires a Resend API key ({smtpStatus?.error || 'VITE_RESEND_API_KEY missing in .env'}).
+                          {smtpStatus?.needsActivation 
+                            ? 'FormSubmit activation pending: Please click the blue "ACTIVATE FORM" button in the email sent to contact.cognisys@gmail.com.' 
+                            : (smtpStatus?.error || 'All your details are ready for instant dispatch.')}
                         </p>
                         <p style={{ margin: '0 0 10px 0' }}>
                           Click the button below to send this message directly to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span>:
@@ -477,67 +451,38 @@ export const Contact = () => {
                     <div style={{
                       padding: '18px 20px',
                       borderRadius: '12px',
-                      background: '#FFF7ED',
-                      border: '1px solid #FED7AA',
-                      color: '#9A3412',
+                      background: smtpStatus?.needsActivation ? '#EFF6FF' : '#FFF7ED',
+                      border: smtpStatus?.needsActivation ? '1px solid #BFDBFE' : '1px solid #FED7AA',
+                      color: smtpStatus?.needsActivation ? '#1E40AF' : '#9A3412',
                       fontSize: '0.88rem',
                       marginBottom: '24px',
-                      boxShadow: '0 4px 12px rgba(234, 88, 12, 0.08)'
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
                     }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: '#C2410C', marginBottom: '6px' }}>
-                        <span>⚠️ Email Not Sent Over Wire</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800, color: smtpStatus?.needsActivation ? '#1D4ED8' : '#C2410C', marginBottom: '8px' }}>
+                        <span>{smtpStatus?.needsActivation ? '📬 1-Step Form Activation Required' : '⚠️ Submission Notice'}</span>
                       </div>
-                      <div style={{ marginBottom: '14px', lineHeight: 1.5, color: '#7C2D12' }}>
-                        {error}
-                      </div>
-
-                      {/* Quick Paste Resend API Key right here */}
-                      <div style={{ background: '#FFFFFF', border: '1px solid #FDBA74', borderRadius: '8px', padding: '12px 14px', marginBottom: '12px' }}>
-                        <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#0F172A', marginBottom: '6px' }}>
-                          🔑 Enter your Resend API Key to activate automated dispatch:
-                        </div>
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                          <input
-                            type="password"
-                            placeholder="re_123456789..."
-                            value={inputApiKey}
-                            onChange={(e) => setInputApiKey(e.target.value)}
-                            style={{
-                              flex: 1,
-                              minWidth: '200px',
-                              padding: '8px 12px',
-                              borderRadius: '6px',
-                              border: '1px solid #CBD5E1',
-                              fontSize: '0.85rem'
-                            }}
-                          />
-                          <button
-                            type="button"
-                            onClick={handleSaveKeyAndRetry}
-                            disabled={keySaving}
-                            className="btn-primary"
-                            style={{ padding: '8px 16px', fontSize: '0.82rem', whiteSpace: 'nowrap' }}
-                          >
-                            {keySaving ? 'Saving...' : 'Save & Send Now'}
-                          </button>
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: '#64748B', marginTop: '6px' }}>
-                          Get your key free at <a href="https://resend.com/api-keys" target="_blank" rel="noopener noreferrer" style={{ color: '#0284C7', textDecoration: 'underline' }}>resend.com/api-keys</a>
-                        </div>
+                      <div style={{ marginBottom: '14px', lineHeight: 1.55 }}>
+                        {smtpStatus?.needsActivation ? (
+                          <>
+                            FormSubmit has sent an activation link to <strong>contact.cognisys@gmail.com</strong>. Please check your inbox and click the blue <strong>"ACTIVATE FORM"</strong> button. Once clicked, this form is fully active!
+                          </>
+                        ) : (
+                          error
+                        )}
                       </div>
 
-                      {/* 1-Click Send via Gmail Web */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', paddingTop: '4px' }}>
-                        <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#9A3412' }}>
-                          Or transmit directly without key:
+                      {/* Direct 1-Click Send via Gmail Web fallback */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', paddingTop: '6px', borderTop: smtpStatus?.needsActivation ? '1px solid #DBEAFE' : '1px solid #FED7AA' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                          Or transmit all filled details directly right now:
                         </span>
                         <a
-                          href={smtpStatus?.gmailComposeUrl || `https://mail.google.com/mail/?view=cm&fs=1&to=contact.cognisys@gmail.com&su=${encodeURIComponent(`[COGNISYS] Inquiry from ${formData.name || 'Visitor'}`)}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage:\n${formData.message}`)}`}
+                          href={smtpStatus?.gmailComposeUrl || `https://mail.google.com/mail/?view=cm&fs=1&to=contact.cognisys@gmail.com&su=${encodeURIComponent(`[COGNISYS] Inquiry from ${formData.name || 'Visitor'}`)}&body=${encodeURIComponent(`Dear Cognisys Team,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\nSubject: ${formData.subject}\n\nMessage:\n${formData.message}`)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn-primary"
                           style={{
-                            padding: '8px 16px',
+                            padding: '8px 18px',
                             fontSize: '0.82rem',
                             textDecoration: 'none',
                             background: '#0284C7',
