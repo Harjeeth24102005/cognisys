@@ -213,7 +213,7 @@ async function dispatchViaResend(payload) {
           <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
             CLIENT CONTACT DETAILS
           </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
             <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Name:</strong> <span style="font-weight: 700;">${clientName}</span></div>
             <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Email:</strong> <a href="mailto:${clientEmail}" style="color: #38bdf8; text-decoration: underline; font-weight: 600;">${clientEmail}</a></div>
             <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Phone:</strong> ${phone}</div>
@@ -225,7 +225,7 @@ async function dispatchViaResend(payload) {
           <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
             PROJECT DOMAIN &amp; TITLE
           </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
             <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Service:</strong> ${serviceName}</div>
             <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Project Title:</strong> <span style="font-weight: 700;">${title}</span></div>
           </div>
@@ -236,7 +236,7 @@ async function dispatchViaResend(payload) {
           <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
             REQUIREMENTS &amp; TECHNICAL SPECIFICATIONS
           </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.6;">
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; line-height: 1.6;">
             <div style="color: #94a3b8; font-size: 12px; margin-bottom: 4px;">[CONTACT MESSAGE]</div>
             <div style="color: #cbd5e1; font-weight: 600; margin-bottom: 8px;">Subject: ${subject}</div>
             <div style="color: #ffffff; white-space: pre-line; word-break: break-word;">${message}</div>
@@ -248,7 +248,7 @@ async function dispatchViaResend(payload) {
           <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
             BUDGET &amp; TARGET DELIVERY TIMELINE
           </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
             <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Estimated Budget:</strong> ${budget}</div>
             <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Target Delivery:</strong> ${timeline}</div>
           </div>
@@ -259,7 +259,7 @@ async function dispatchViaResend(payload) {
           <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
             TECH STACK PREFERENCES
           </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #ffffff;">
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; color: #ffffff;">
             ${techPreferences}
           </div>
         </div>
