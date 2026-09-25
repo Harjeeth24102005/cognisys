@@ -139,10 +139,11 @@ export const OrderWizard = () => {
         attachment_filename: formData.attachment_filename || null
       });
 
-      const newOrder = res.order;
-      setSubmittedOrder(newOrder);
       setSmtpStatus(res);
-      if (res.delivered) {
+      if (res && res.delivered) {
+        const newOrder = res.order;
+        setSubmittedOrder(newOrder);
+        setError(null);
         try {
           confetti({
             particleCount: 140,
@@ -150,6 +151,9 @@ export const OrderWizard = () => {
             origin: { y: 0.55 }
           });
         } catch (err) {}
+      } else {
+        setSubmittedOrder(null);
+        setError(res?.error || 'Email was NOT sent. Resend API Key is missing in .env.');
       }
 
       // Order successfully submitted and dispatched via direct mail relay

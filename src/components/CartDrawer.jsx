@@ -59,15 +59,15 @@ export const CartDrawer = () => {
         cart_items_json: JSON.stringify(cartItems)
       };
 
-      const orderResult = await smtpService.sendOrderSpecifications(orderPayload);
-      const res = orderResult.order;
-      setCompletedOrder(res);
       setDispatchStatus(orderResult);
-      setPurchaseSuccess(true);
-      clearCart();
+      if (orderResult && orderResult.delivered) {
+        const res = orderResult.order;
+        setCompletedOrder(res);
+        setPurchaseSuccess(true);
+        setError(null);
+        clearCart();
 
-      // Celebratory confetti animation
-      if (orderResult.delivered) {
+        // Celebratory confetti animation
         try {
           confetti({
             particleCount: 150,
@@ -75,6 +75,9 @@ export const CartDrawer = () => {
             origin: { y: 0.5 }
           });
         } catch (err) {}
+      } else {
+        setPurchaseSuccess(false);
+        setError(orderResult?.error || 'Email was NOT sent. Resend API Key is missing in .env.');
       }
 
       // Order successfully submitted and dispatched via direct mail relay
