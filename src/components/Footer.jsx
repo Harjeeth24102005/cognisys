@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Cpu, ShieldCheck, Mail, Phone, MapPin, ArrowRight, Sparkles, Clock, Lock } from 'lucide-react';
+import cognisysLogoFull from '../assets/cognisys-logo-full.png';
+import { getAssetUrl } from '../utils/assets';
 
 export const Footer = () => {
   return (
@@ -35,8 +37,12 @@ export const Footer = () => {
             }}>
               <Link to="/">
                 <img
-                  src="/cognisys-logo-full.png"
+                  src={cognisysLogoFull}
                   alt="COGNISYS - Innovation ✦ Intelligence ✦ Impact"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = getAssetUrl('/cognisys-logo-full.png');
+                  }}
                   style={{
                     height: '50px',
                     width: 'auto',

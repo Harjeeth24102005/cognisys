@@ -5,6 +5,8 @@ import {
   Shield, Eye, Globe, Code, GraduationCap, ArrowRight, Phone, Mail, Sparkles, Terminal 
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import cognisysLogoFull from '../assets/cognisys-logo-full.png';
+import { getAssetUrl } from '../utils/assets';
 
 export const Navbar = () => {
   const { totalItemCount, setIsCartOpen } = useCart();
@@ -119,9 +121,13 @@ export const Navbar = () => {
           overflow: 'visible'
         }}>
           <img
-            src="/cognisys-logo-full.png"
+            src={cognisysLogoFull}
             alt="COGNISYS - Innovation ✦ Intelligence ✦ Impact"
             className="logo-blend navbar-logo"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = getAssetUrl('/cognisys-logo-full.png');
+            }}
             style={{
               height: '56px',
               width: 'auto',

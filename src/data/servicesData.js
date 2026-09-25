@@ -1,4 +1,10 @@
 import { Eye, Globe, Cpu, Terminal, GraduationCap, UserCheck } from 'lucide-react';
+import imgAiCctv from '../assets/images/card-ai-cctv.jpg';
+import imgWebDev from '../assets/images/card-web-dev.jpg';
+import imgAiProjects from '../assets/images/card-ai-projects.jpg';
+import imgPythonProjects from '../assets/images/card-python-projects.jpg';
+import imgStudentProjects from '../assets/images/card-student-projects.jpg';
+import imgFaceRecog from '../assets/images/card-face-recognition.jpg';
 
 export const CORE_SERVICES = [
   {
@@ -8,7 +14,7 @@ export const CORE_SERVICES = [
     category: 'Computer Vision & Attendance',
     short_desc: 'Transform existing or new CCTV infrastructure into an autonomous, contactless biometric attendance and surveillance network powered by edge AI.',
     full_desc: 'Cognisys AI-Based CCTV Attendance Monitoring System integrates state-of-the-art computer vision (YOLOv11 & FaceNet/ArcFace) with real-time video streaming. Features contactless multi-person facial recognition attendance marking, anti-spoofing verification, entry/exit timestamp logging, automated shift rosters, and instant management reporting.',
-    image: '/images/card-ai-cctv.jpg',
+    image: imgAiCctv,
     icon: Eye,
     color: '#00B4D8',
     technologies: ['PyTorch', 'OpenCV', 'YOLOv11', 'FaceNet', 'FastAPI'],
@@ -28,7 +34,7 @@ export const CORE_SERVICES = [
     category: 'Web Applications & Platforms',
     short_desc: 'High-performance, beautifully responsive business websites, interactive client portals, and cloud-native modern web applications.',
     full_desc: 'Cognisys delivers ultra-fast, modern websites and web applications built with modern frontend frameworks (React, Vite, Next.js), secure REST APIs, and scalable backend infrastructure. Engineered for speed, responsive aesthetics, high conversion, and seamless user experiences across all devices.',
-    image: '/images/card-web-dev.jpg',
+    image: imgWebDev,
     icon: Globe,
     color: '#0284C7',
     technologies: ['React', 'Vite', 'JavaScript', 'HTML5/CSS3', 'FastAPI'],
@@ -48,7 +54,7 @@ export const CORE_SERVICES = [
     category: 'Artificial Intelligence & Machine Learning',
     short_desc: 'End-to-end artificial intelligence systems including deep learning, NLP, computer vision, LLM integrations, and neural predictive pipelines.',
     full_desc: 'Custom artificial intelligence and machine learning solutions engineered from architecture to deployment. We design and implement custom deep learning models, LLM-powered applications, document intelligence, automated classification, and neural predictive models.',
-    image: '/images/card-ai-projects.jpg',
+    image: imgAiProjects,
     icon: Cpu,
     color: '#7C3AED',
     technologies: ['Python', 'PyTorch', 'TensorFlow', 'HuggingFace', 'OpenCV'],
@@ -68,7 +74,7 @@ export const CORE_SERVICES = [
     category: 'Python & Automation Engineering',
     short_desc: 'High-throughput Python applications, FastAPI/Django backend architectures, data scrapers, automation bots, and desktop software.',
     full_desc: 'Robust Python-powered solutions built for scalability, automation, and speed. From high-performance asynchronous microservices and data engineering pipelines to intelligent automation bots, desktop utilities, and custom scripts.',
-    image: '/images/card-python-projects.jpg',
+    image: imgPythonProjects,
     icon: Terminal,
     color: '#0891B2',
     technologies: ['Python', 'FastAPI', 'Django', 'Flask', 'Pandas'],
@@ -88,7 +94,7 @@ export const CORE_SERVICES = [
     category: 'Academic Engineering & Research',
     short_desc: 'Complete engineering final-year capstones with working source code, IEEE base papers, complete documentation, and viva guidance.',
     full_desc: 'Comprehensive guidance and prototype development for engineering final-year students across CSE, IT, AI/DS, and ECE domains. Includes verified working source code, complete documentation, IEEE base paper implementations, architecture diagrams, and one-on-one viva preparation support.',
-    image: '/images/card-student-projects.jpg',
+    image: imgStudentProjects,
     icon: GraduationCap,
     color: '#F59E0B',
     technologies: ['Python', 'React', 'PyTorch', 'FastAPI', 'OpenCV'],
@@ -108,7 +114,7 @@ export const CORE_SERVICES = [
     category: 'Computer Vision & Biometrics',
     short_desc: 'Enterprise-grade facial recognition engine for secure access control, biometric identity verification, and anti-spoofing surveillance.',
     full_desc: 'State-of-the-art multi-face recognition architecture engineered for lightning-fast identity verification. Includes 3D depth anti-spoofing against physical photos and screen replays, multi-angle pose tolerance, instant door-lock/turnstile relay triggers, and comprehensive audit logs.',
-    image: '/images/card-face-recognition.jpg',
+    image: imgFaceRecog,
     icon: UserCheck,
     color: '#10B981',
     technologies: ['Python', 'ArcFace', 'OpenCV', 'InsightFace', 'FastAPI'],

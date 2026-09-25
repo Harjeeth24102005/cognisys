@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import cognisysLogo from '../assets/cognisys-logo.png';
+import { getAssetUrl } from '../utils/assets';
 
 export const LoadingScreen = ({ onComplete }) => {
   const [progress, setProgress] = useState(15);
@@ -37,9 +39,13 @@ export const LoadingScreen = ({ onComplete }) => {
     }}>
       <div style={{ marginBottom: '28px', textAlign: 'center' }}>
         <img
-          src="/cognisys-logo.png"
+          src={cognisysLogo}
           alt="COGNISYS Logo"
           className="logo-blend"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = getAssetUrl('/cognisys-logo.png');
+          }}
           style={{
             height: '70px',
             width: 'auto',

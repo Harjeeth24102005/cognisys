@@ -9,6 +9,7 @@ import { useCart } from '../context/CartContext';
 import { api } from '../services/api';
 import { CORE_SERVICES } from '../data/servicesData';
 import introVideo from '../assets/intro-video.mp4';
+import { getAssetUrl } from '../utils/assets';
 
 export const Home = () => {
   const [services, setServices] = useState(CORE_SERVICES);
@@ -125,8 +126,8 @@ export const Home = () => {
             className="hero-video"
           >
             <source src={introVideo} type="video/mp4" />
-            <source src="/intro-video.mp4" type="video/mp4" />
-            <source src="/intro video.mp4" type="video/mp4" />
+            <source src={getAssetUrl('/intro-video.mp4')} type="video/mp4" />
+            <source src={getAssetUrl('/intro video.mp4')} type="video/mp4" />
           </video>
           {/* Subtle soft gradient at bottom so controls blend seamlessly into content on desktop */}
           <div className="hero-video-overlay" />
@@ -355,7 +356,7 @@ export const Home = () => {
             {services.map((svc) => {
               const IconComp = svc.icon || Eye;
               const svcColor = svc.color || '#00B4D8';
-              const cardImage = svc.image || '/images/card-software.jpg';
+              const cardImage = getAssetUrl(svc.image || '/images/card-software.jpg');
               let techs = [];
               if (Array.isArray(svc.technologies)) {
                 techs = svc.technologies;
@@ -386,6 +387,10 @@ export const Home = () => {
                       src={cardImage}
                       alt={svc.name}
                       loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = getAssetUrl('/images/card-software.jpg');
+                      }}
                     />
                     <div className="service-card-overlay" />
 

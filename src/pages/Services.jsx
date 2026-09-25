@@ -7,6 +7,7 @@ import {
 import { ServiceCard3D } from '../components3d/ServiceCard3D';
 import { api } from '../services/api';
 import { CORE_SERVICES } from '../data/servicesData';
+import { getAssetUrl } from '../utils/assets';
 
 export const Services = () => {
   const [services, setServices] = useState(CORE_SERVICES);
@@ -63,7 +64,7 @@ export const Services = () => {
         <div className="container-custom">
           <div className="services-grid-3col">
             {services.map((svc) => {
-              const cardImage = svc.image || '/images/card-software.jpg';
+              const cardImage = getAssetUrl(svc.image || '/images/card-software.jpg');
               let features = Array.isArray(svc.features) ? svc.features : [];
               let techs = Array.isArray(svc.technologies) ? svc.technologies : [];
               try {
@@ -78,6 +79,10 @@ export const Services = () => {
                       src={cardImage}
                       alt={svc.name}
                       loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = getAssetUrl('/images/card-software.jpg');
+                      }}
                     />
                     <div className="service-card-overlay" />
                     <div style={{
