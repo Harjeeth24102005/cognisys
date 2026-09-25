@@ -82,41 +82,121 @@ async function dispatchViaResend(payload) {
 
   const clientEmail = payload.email || payload.customer_email || 'client@cognisys.ai';
   const clientName = payload.name || payload.customer_name || 'Valued Client';
-  const subject = payload._subject || payload.subject || 'Website Inquiry';
-  const message = payload.message || payload.description || payload.inquiry_details || '';
+  const orderNumber = payload.order_number || `COG-2026-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
+  const title = payload.project_title || payload.title || payload.subject || 'Website Inquiry';
+  const subject = payload.subject || payload.title || 'General / Custom Inquiry';
+  const serviceName = payload.service_domain || payload.service_name || 'General / Custom Inquiry';
+  const message = payload.message || payload.description || payload.specifications || payload.inquiry_details || 'No additional specifications provided.';
+  const budget = payload.estimated_budget || payload.budget || 'Inquiry';
+  const timeline = payload.target_delivery || payload.timeline || 'Direct Inquiry';
+  const techPreferences = payload.architecture_preference || payload.tech_preferences || 'Default Recommended Stack';
+  const phone = payload.phone || payload.customer_phone || '8248349844';
+  const dateStr = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
 
+  const finalSubject = `[NEW PROJECT ORDER #${orderNumber}] - ${title}`;
+
+  // Exact dark-gold executive specification card matching official Cognisys format
   const htmlContent = `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 12px; padding: 28px; background: #ffffff;">
-      <div style="border-bottom: 2px solid #0284c7; padding-bottom: 12px; margin-bottom: 20px;">
-        <h2 style="color: #0284c7; margin: 0; font-size: 1.4rem;">Cognisys Specification Transmission</h2>
-        <span style="font-size: 0.8rem; color: #64748b;">Automated Direct Dispatch via Resend</span>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${finalSubject}</title>
+    </head>
+    <body style="margin: 0; padding: 24px 12px; background-color: #050b14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #0b1528; border: 1px solid #1e293b; border-radius: 14px; padding: 28px 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);">
+        
+        <!-- Top Badge -->
+        <div style="margin-bottom: 14px;">
+          <span style="display: inline-block; background-color: #f59e0b; color: #0b132b; font-size: 11px; font-weight: 800; padding: 4px 14px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;">
+            COGNISYS PROJECT SPECIFICATION
+          </span>
+        </div>
+
+        <!-- Main Order Title -->
+        <h1 style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.3px;">
+          Order #${orderNumber}
+        </h1>
+
+        <!-- Submitted At -->
+        <div style="color: #f59e0b; font-size: 12px; font-weight: 500; margin-bottom: 22px;">
+          Submitted at: ${dateStr}
+        </div>
+
+        <!-- Divider line -->
+        <div style="border-top: 1px solid rgba(245, 158, 11, 0.35); margin-bottom: 20px;"></div>
+
+        <!-- Section 1: Client Contact Details -->
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
+            CLIENT CONTACT DETAILS
+          </div>
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
+            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Name:</strong> <span style="font-weight: 700;">${clientName}</span></div>
+            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Email:</strong> <a href="mailto:${clientEmail}" style="color: #38bdf8; text-decoration: underline; font-weight: 600;">${clientEmail}</a></div>
+            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Phone:</strong> ${phone}</div>
+          </div>
+        </div>
+
+        <!-- Section 2: Project Domain & Title -->
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
+            PROJECT DOMAIN &amp; TITLE
+          </div>
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
+            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Service:</strong> ${serviceName}</div>
+            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Project Title:</strong> <span style="font-weight: 700;">${title}</span></div>
+          </div>
+        </div>
+
+        <!-- Section 3: Requirements & Technical Specifications -->
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
+            REQUIREMENTS &amp; TECHNICAL SPECIFICATIONS
+          </div>
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.6;">
+            <div style="color: #94a3b8; font-size: 12px; margin-bottom: 4px;">[CONTACT MESSAGE]</div>
+            <div style="color: #cbd5e1; font-weight: 600; margin-bottom: 8px;">Subject: ${subject}</div>
+            <div style="color: #ffffff; white-space: pre-line; word-break: break-word;">${message}</div>
+          </div>
+        </div>
+
+        <!-- Section 4: Budget & Target Delivery Timeline -->
+        <div style="margin-bottom: 16px;">
+          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
+            BUDGET &amp; TARGET DELIVERY TIMELINE
+          </div>
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
+            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Estimated Budget:</strong> ${budget}</div>
+            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Target Delivery:</strong> ${timeline}</div>
+          </div>
+        </div>
+
+        <!-- Section 5: Tech Stack Preferences -->
+        <div style="margin-bottom: 22px;">
+          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
+            TECH STACK PREFERENCES
+          </div>
+          <div style="background-color: #101e38; border: 1px solid #1e293b; border-radius: 8px; padding: 14px 16px; font-size: 13px; color: #ffffff;">
+            ${techPreferences}
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="border-top: 1px solid #1e293b; padding-top: 18px; font-size: 11px; color: #64748b; text-align: center;">
+          Automated Transmission to <a href="mailto:contact.cognisys@gmail.com" style="color: #38bdf8; text-decoration: none;">contact.cognisys@gmail.com</a> from cognisys.
+        </div>
       </div>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 140px;">Client Name:</td><td style="padding: 6px 0; color: #0b132b; font-weight: 700;">${clientName}</td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Client Email:</td><td style="padding: 6px 0;"><a href="mailto:${clientEmail}" style="color: #0284c7; font-weight: 600;">${clientEmail}</a></td></tr>
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Phone:</td><td style="padding: 6px 0; color: #0b132b;">${payload.phone || payload.customer_phone || 'Not provided'}</td></tr>
-        ${payload.order_number ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Order Ref:</td><td style="padding: 6px 0; color: #0284c7; font-weight: 700;">#${payload.order_number}</td></tr>` : ''}
-        ${payload.service_domain || payload.service_name ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Service:</td><td style="padding: 6px 0; color: #0b132b;">${payload.service_domain || payload.service_name}</td></tr>` : ''}
-        ${payload.estimated_budget || payload.budget ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Budget:</td><td style="padding: 6px 0; color: #059669; font-weight: 700;">${payload.estimated_budget || payload.budget}</td></tr>` : ''}
-        ${payload.target_delivery || payload.timeline ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Timeline:</td><td style="padding: 6px 0; color: #0b132b;">${payload.target_delivery || payload.timeline}</td></tr>` : ''}
-        ${payload.configured_items && payload.configured_items !== 'None' ? `<tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Configured Add-ons:</td><td style="padding: 6px 0; color: #0b132b;">${payload.configured_items}</td></tr>` : ''}
-        <tr><td style="padding: 6px 0; color: #64748b; font-weight: 600;">Subject:</td><td style="padding: 6px 0; color: #0b132b; font-weight: 600;">${subject}</td></tr>
-      </table>
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-        <div style="font-size: 0.85rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Specifications &amp; Message:</div>
-        <div style="white-space: pre-line; color: #334155; font-size: 0.92rem;">${message || payload.specifications || 'No additional specifications provided.'}</div>
-      </div>
-      <div style="border-top: 1px solid #f1f5f9; padding-top: 14px; font-size: 0.78rem; color: #94a3b8; text-align: center;">
-        Cognisys Enterprise Systems • Delivered to ${EMAIL_API_CONFIG.receiverEmail} • Reply-To: ${clientEmail}
-      </div>
-    </div>
+    </body>
+    </html>
   `;
 
   const requestBody = {
     from: EMAIL_API_CONFIG.resend.from || 'Cognisys <onboarding@resend.dev>',
     to: [EMAIL_API_CONFIG.receiverEmail],
     reply_to: clientEmail,
-    subject: `[COGNISYS] From ${clientName} (${clientEmail}) - ${subject}`,
+    subject: finalSubject,
     html: htmlContent
   };
 
