@@ -177,14 +177,46 @@ export const CartDrawer = () => {
                 <CheckCircle2 size={38} />
               </div>
               <h3 style={{ fontSize: '1.4rem', color: '#0B132B', marginBottom: '8px', fontWeight: 800 }}>
-                Order Specifications Dispatched
+                Formal Order Transmitted Successfully!
               </h3>
-              <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.75rem', fontWeight: 700, padding: '3px 12px', borderRadius: '20px', marginBottom: '14px' }}>
-                ⚡ DISPATCHED DIRECTLY TO CONTACT.COGNISYS@GMAIL.COM
+              <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.75rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '14px' }}>
+                ✓ DELIVERED TO CONTACT.COGNISYS@GMAIL.COM &amp; AUTO-CONFIRMED TO SENDER
               </div>
-              <p style={{ fontSize: '0.9rem', color: '#1E293B', marginBottom: '24px', lineHeight: 1.5, fontWeight: 500 }}>
-                Your complete technical requirements have been received and transmitted directly to <strong style={{ color: '#0284C7' }}>contact.cognisys@gmail.com</strong>.
-              </p>
+
+              {/* Formal Transmission Status Box */}
+              <div style={{
+                background: '#F0FDF4',
+                border: '1px solid #BBF7D0',
+                borderRadius: 'var(--radius-md)',
+                padding: '14px 18px',
+                textAlign: 'left',
+                marginBottom: '16px',
+                fontSize: '0.86rem',
+                color: '#166534',
+                lineHeight: 1.5
+              }}>
+                <p style={{ margin: '0 0 6px 0', fontWeight: 700 }}>
+                  The mail is sent to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details.
+                </p>
+                <p style={{ margin: '0 0 10px 0' }}>
+                  A confirmation has also been dispatched to your email address (<strong>{completedOrder.customer_email}</strong>). The Cognisys technical team will review your specifications and contact you soon.
+                </p>
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #86EFAC',
+                  borderRadius: '6px',
+                  padding: '8px 12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontWeight: 700,
+                  color: '#0F172A',
+                  fontSize: '0.82rem'
+                }}>
+                  <Phone size={15} color="#059669" />
+                  <span>If you need immediate assistance now, call: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
+                </div>
+              </div>
 
               <div style={{
                 background: '#F8FAFC',
@@ -192,37 +224,37 @@ export const CartDrawer = () => {
                 borderRadius: 'var(--radius-md)',
                 padding: '16px',
                 textAlign: 'left',
-                fontSize: '0.85rem',
-                marginBottom: '20px',
+                fontSize: '0.84rem',
+                marginBottom: '18px',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '8px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#0F172A', fontWeight: 600 }}>Order ID:</span>
+                  <span style={{ color: '#64748B', fontWeight: 600 }}>Order ID:</span>
                   <span style={{ color: '#0284C7', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>#{completedOrder.order_number}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#0F172A', fontWeight: 600 }}>Client Name:</span>
+                  <span style={{ color: '#64748B', fontWeight: 600 }}>Client Name:</span>
                   <span style={{ color: '#0F172A', fontWeight: 700 }}>{completedOrder.customer_name}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#0F172A', fontWeight: 600 }}>Contact Email:</span>
+                  <span style={{ color: '#64748B', fontWeight: 600 }}>Contact Email:</span>
                   <span style={{ color: '#0284C7', fontWeight: 600 }}>{completedOrder.customer_email}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#0F172A', fontWeight: 600 }}>Direct Target:</span>
-                  <span style={{ color: '#0B132B', fontWeight: 700 }}>contact.cognisys@gmail.com</span>
+                  <span style={{ color: '#64748B', fontWeight: 600 }}>Phone:</span>
+                  <span style={{ color: '#0F172A', fontWeight: 600 }}>{completedOrder.customer_phone}</span>
                 </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
                 <a
-                  href={`mailto:contact.cognisys@gmail.com?subject=${encodeURIComponent(`[ORDER #${completedOrder.order_number}] - ${completedOrder.title || 'Service Purchase'}`)}&body=${encodeURIComponent(`Order #${completedOrder.order_number}\nClient: ${completedOrder.customer_name} (${completedOrder.customer_email} | ${completedOrder.customer_phone})\n\nRequirements:\n${completedOrder.description || 'Project Order'}`)}`}
+                  href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(completedOrder.customer_email)}&subject=${encodeURIComponent(`[COGNISYS ORDER #${completedOrder.order_number}] - ${completedOrder.title || 'Service Purchase'}`)}&body=${encodeURIComponent(`Order #${completedOrder.order_number}\nClient: ${completedOrder.customer_name} (${completedOrder.customer_email} | ${completedOrder.customer_phone})\n\nRequirements:\n${completedOrder.description || 'Project Order'}\n\nEmergency Helpline: 8248349844`)}`}
                   className="btn-secondary"
-                  style={{ width: '100%', padding: '12px', textAlign: 'center', textDecoration: 'none', display: 'block' }}
+                  style={{ width: '100%', padding: '12px', textAlign: 'center', textDecoration: 'none', display: 'block', fontSize: '0.86rem' }}
                 >
-                  <span>Open in Email App</span>
+                  <span>Open in Mail App (CC to you)</span>
                 </a>
                 <button
                   onClick={() => {

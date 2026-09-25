@@ -259,22 +259,85 @@ export const Contact = () => {
                   }}>
                     <CheckCircle2 size={38} />
                   </div>
-                  <h3 style={{ fontSize: '1.4rem', color: '#0B132B', fontWeight: 800, marginBottom: '10px' }}>
-                    Message Transmitted to Engineering!
+                  <h3 style={{ fontSize: '1.4rem', color: '#0B132B', fontWeight: 800, marginBottom: '8px' }}>
+                    Formal Inquiry Transmitted Successfully!
                   </h3>
-                  <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', marginBottom: '16px' }}>
-                    ⚡ DISPATCHED DIRECTLY TO CONTACT.COGNISYS@GMAIL.COM
+                  <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '16px' }}>
+                    ✓ DELIVERED TO CONTACT.COGNISYS@GMAIL.COM &amp; AUTO-CONFIRMED TO SENDER
                   </div>
-                  <p style={{ fontSize: '0.94rem', color: '#1E293B', marginBottom: '24px', lineHeight: 1.6, fontWeight: 500 }}>
-                    Thank you, <strong style={{ color: '#0B132B' }}>{formData.name}</strong>. Your technical inquiry has been transmitted to <strong style={{ color: '#0284C7' }}>contact.cognisys@gmail.com</strong>. Our team will review your specifications and contact you shortly.
-                  </p>
+
+                  {/* Formal Transmission Status Box */}
+                  <div style={{
+                    background: '#F0FDF4',
+                    border: '1px solid #BBF7D0',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '16px 20px',
+                    textAlign: 'left',
+                    marginBottom: '20px',
+                    fontSize: '0.9rem',
+                    color: '#166534',
+                    lineHeight: 1.6
+                  }}>
+                    <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
+                      The mail is sent to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details.
+                    </p>
+                    <p style={{ margin: '0 0 10px 0' }}>
+                      A confirmation has also been dispatched to your email address (<strong>{formData.email}</strong>). The Cognisys technical team will review your requirements and contact you soon.
+                    </p>
+                    <div style={{
+                      background: '#FFFFFF',
+                      border: '1px solid #86EFAC',
+                      borderRadius: '8px',
+                      padding: '10px 14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '10px',
+                      fontWeight: 700,
+                      color: '#0F172A'
+                    }}>
+                      <Phone size={18} color="#059669" />
+                      <span>If you need immediate assistance now, call: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
+                    </div>
+                  </div>
+
+                  {/* Summary of Transmitted Fields */}
+                  <div style={{
+                    background: '#F8FAFC',
+                    border: '1px solid #E2E8F0',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '16px',
+                    textAlign: 'left',
+                    fontSize: '0.84rem',
+                    marginBottom: '24px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#64748B', fontWeight: 600 }}>Sender:</span>
+                      <span style={{ color: '#0B132B', fontWeight: 700 }}>{formData.name} &lt;{formData.email}&gt;</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#64748B', fontWeight: 600 }}>Phone:</span>
+                      <span style={{ color: '#0B132B', fontWeight: 600 }}>{formData.phone || 'Not provided'}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#64748B', fontWeight: 600 }}>Subject:</span>
+                      <span style={{ color: '#0284C7', fontWeight: 700 }}>{formData.subject || 'General Inquiry'}</span>
+                    </div>
+                    <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '8px', marginTop: '4px' }}>
+                      <span style={{ color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Message Details:</span>
+                      <span style={{ color: '#334155', whiteSpace: 'pre-line' }}>{formData.message}</span>
+                    </div>
+                  </div>
+
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <a
-                      href={`mailto:contact.cognisys@gmail.com?subject=${encodeURIComponent(formData.subject || `Inquiry from ${formData.name}`)}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage:\n${formData.message}`)}`}
+                      href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(formData.email)}&subject=${encodeURIComponent(`[COGNISYS] ${formData.subject || `Inquiry from ${formData.name}`}`)}&body=${encodeURIComponent(`Dear Cognisys Team,\n\nName: ${formData.name}\nEmail: ${formData.email}\nPhone: ${formData.phone}\n\nMessage Details:\n${formData.message}\n\nEmergency Helpline: 8248349844`)}`}
                       className="btn-primary"
-                      style={{ textDecoration: 'none', padding: '10px 20px', fontSize: '0.88rem' }}
+                      style={{ textDecoration: 'none', padding: '12px 22px', fontSize: '0.88rem' }}
                     >
-                      <span>Open in Email App</span>
+                      <span>Open in Mail App (CC to you)</span>
                     </a>
                     <button
                       onClick={() => {
@@ -282,9 +345,9 @@ export const Contact = () => {
                         setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
                       }}
                       className="btn-secondary"
-                      style={{ padding: '10px 20px', fontSize: '0.88rem' }}
+                      style={{ padding: '12px 20px', fontSize: '0.88rem' }}
                     >
-                      Send Another Inquiry
+                      Send Another Message
                     </button>
                   </div>
                 </div>

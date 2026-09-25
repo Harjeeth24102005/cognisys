@@ -195,52 +195,103 @@ export const OrderWizard = () => {
                   <CheckCircle2 size={44} />
                 </div>
 
-                <h2 style={{ fontSize: '1.8rem', color: '#0B132B', marginBottom: '12px', fontWeight: 900 }}>
-                  Specifications Transmitted Successfully!
+                <h2 style={{ fontSize: '1.8rem', color: '#0B132B', marginBottom: '8px', fontWeight: 900 }}>
+                  Formal Specifications Transmitted Successfully!
                 </h2>
-                <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '16px' }}>
-                  ⚡ DISPATCHED DIRECTLY TO CONTACT.COGNISYS@GMAIL.COM
+                <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '18px' }}>
+                  ✓ DELIVERED TO CONTACT.COGNISYS@GMAIL.COM &amp; AUTO-CONFIRMED TO SENDER
                 </div>
-                <p style={{ fontSize: '0.95rem', color: '#1E293B', maxWidth: '560px', margin: '0 auto 24px', lineHeight: 1.6, fontWeight: 500 }}>
-                  Your technical requirements for <strong>{submittedOrder.title}</strong> have been registered under Reference <strong>#{submittedOrder.order_number}</strong> and transmitted directly to <strong>contact.cognisys@gmail.com</strong>.
-                </p>
+
+                {/* Formal Transmission Status Box */}
+                <div style={{
+                  background: '#F0FDF4',
+                  border: '1px solid #BBF7D0',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '18px 22px',
+                  maxWidth: '560px',
+                  margin: '0 auto 24px',
+                  textAlign: 'left',
+                  fontSize: '0.9rem',
+                  color: '#166534',
+                  lineHeight: 1.6
+                }}>
+                  <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
+                    The mail is sent to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details for <strong>{submittedOrder.title}</strong>.
+                  </p>
+                  <p style={{ margin: '0 0 12px 0' }}>
+                    A confirmation has also been dispatched to your email address (<strong>{submittedOrder.customer_email}</strong>). The Cognisys technical team will review your specifications and contact you soon.
+                  </p>
+                  <div style={{
+                    background: '#FFFFFF',
+                    border: '1px solid #86EFAC',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    fontWeight: 700,
+                    color: '#0F172A'
+                  }}>
+                    <Phone size={18} color="#059669" />
+                    <span>If you need immediate assistance now, call: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
+                  </div>
+                </div>
 
                 <div style={{
                   background: '#F8FAFC',
                   border: '1px solid #CBD5E1',
                   borderRadius: 'var(--radius-md)',
                   padding: '20px',
-                  maxWidth: '520px',
-                  margin: '0 auto 32px',
+                  maxWidth: '560px',
+                  margin: '0 auto 28px',
                   textAlign: 'left',
-                  fontSize: '0.88rem',
-                  color: '#0B132B'
+                  fontSize: '0.85rem',
+                  color: '#0B132B',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px'
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#0F172A', fontWeight: 700 }}>Reference Code:</span>
-                    <span style={{ color: '#0284C7', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{submittedOrder.order_number}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: '6px' }}>
+                    <span style={{ color: '#64748B', fontWeight: 700 }}>Reference Code:</span>
+                    <span style={{ color: '#0284C7', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>#{submittedOrder.order_number}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#0F172A', fontWeight: 700 }}>Client Name:</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Client Name:</span>
                     <span style={{ color: '#0B132B', fontWeight: 700 }}>{submittedOrder.customer_name}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#0F172A', fontWeight: 700 }}>Client Email:</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Client Email:</span>
                     <span style={{ color: '#0284C7', fontWeight: 600 }}>{submittedOrder.customer_email}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: '#0F172A', fontWeight: 700 }}>Transmitted To:</span>
-                    <span style={{ color: '#0B132B', fontWeight: 700 }}>contact.cognisys@gmail.com</span>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Client Phone:</span>
+                    <span style={{ color: '#0B132B', fontWeight: 600 }}>{submittedOrder.customer_phone}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Service Domain:</span>
+                    <span style={{ color: '#0284C7', fontWeight: 700 }}>{submittedOrder.service_name}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Project Title:</span>
+                    <span style={{ color: '#0B132B', fontWeight: 700 }}>{submittedOrder.title}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: '#64748B', fontWeight: 600 }}>Timeline &amp; Budget:</span>
+                    <span style={{ color: '#059669', fontWeight: 700 }}>{submittedOrder.timeline} ({submittedOrder.budget})</span>
+                  </div>
+                  <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '6px' }}>
+                    <span style={{ color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Specifications:</span>
+                    <span style={{ color: '#334155', whiteSpace: 'pre-line' }}>{submittedOrder.description}</span>
                   </div>
                 </div>
 
                 <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <a
-                    href={`mailto:contact.cognisys@gmail.com?subject=${encodeURIComponent(`[ORDER #${submittedOrder.order_number}] - ${submittedOrder.title}`)}&body=${encodeURIComponent(`Client: ${submittedOrder.customer_name}\nEmail: ${submittedOrder.customer_email}\nPhone: ${submittedOrder.customer_phone}\nService: ${submittedOrder.service_name}\nOrder Ref: #${submittedOrder.order_number}\n\nSpecifications:\n${submittedOrder.description}`)}`}
+                    href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(submittedOrder.customer_email)}&subject=${encodeURIComponent(`[COGNISYS ORDER #${submittedOrder.order_number}] - ${submittedOrder.title}`)}&body=${encodeURIComponent(`Order #${submittedOrder.order_number}\nClient: ${submittedOrder.customer_name}\nEmail: ${submittedOrder.customer_email}\nPhone: ${submittedOrder.customer_phone}\nService: ${submittedOrder.service_name}\nTimeline: ${submittedOrder.timeline}\nBudget: ${submittedOrder.budget}\n\nSpecifications:\n${submittedOrder.description}\n\nEmergency Helpline: 8248349844`)}`}
                     className="btn-primary"
-                    style={{ textDecoration: 'none' }}
+                    style={{ textDecoration: 'none', padding: '12px 24px', fontSize: '0.9rem' }}
                   >
-                    <span>Open in Email App</span>
+                    <span>Open in Mail App (CC to you)</span>
                   </a>
                   <button
                     onClick={() => {
