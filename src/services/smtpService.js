@@ -63,6 +63,43 @@ function sanitize(input) {
 }
 
 /**
+ * Dispatches via FormSubmit AJAX API
+ */
+async function dispatchViaFormSubmit(payload) {
+  try {
+    const res = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        ...payload,
+        _template: 'table',
+        _captcha: 'false',
+        _autoresponse: getAutoresponderMessage(payload.name || payload.customer_name || 'Valued Client')
+      })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (data.success === 'true' || data.success === true) {
+      return { success: true, provider: 'FormSubmit', message: 'Delivered directly to ' + EMAIL_API_CONFIG.receiverEmail };
+    }
+
+    const needsActivation = typeof data.message === 'string' && data.message.toLowerCase().includes('activation');
+    return {
+      success: false,
+      needsActivation,
+      provider: 'FormSubmit',
+      message: data.message || 'Form submission pending verification'
+    };
+  } catch (err) {
+    console.warn('[FormSubmit] Dispatch error:', err);
+    return { success: false, provider: 'FormSubmit', error: err.message };
+  }
+}
+
+/**
  * Dispatches via Web3Forms API
  */
 async function dispatchViaWeb3Forms(payload) {
@@ -163,7 +200,21 @@ export const smtpService = {
       }
     );
 
-    // 2. Dispatch via Web3Forms API
+    // 2. Dispatch via FormSubmit API
+    const formSubmitResult = await dispatchViaFormSubmit({
+      name: clientName,
+      email: clientEmail,
+      phone: clientPhone,
+      subject: subject,
+      message: message,
+      submitted_on: dateStr,
+      receiver: EMAIL_API_CONFIG.receiverEmail,
+      emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
+      _subject: fullSubject,
+      _replyto: clientEmail
+    });
+
+    // 3. Dispatch via Web3Forms API
     const web3Result = await dispatchViaWeb3Forms({
       name: clientName,
       email: clientEmail,
@@ -177,7 +228,7 @@ export const smtpService = {
       _replyto: clientEmail
     });
 
-    // 3. Local persistence
+    // 4. Local persistence
     const inquiryRecord = {
       id: 'INQ-' + Date.now().toString(36).toUpperCase(),
       name: clientName,
@@ -196,11 +247,17 @@ export const smtpService = {
       localStorage.setItem('cognisys_inquiries', JSON.stringify(existing.slice(0, 50)));
     } catch (e) {}
 
-    // 4. Construct direct Gmail Web URL for instant 1-click dispatch without any third party
+    // 5. Construct direct Gmail Web URL for instant 1-click dispatch without any third party
     const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nName: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nSubject: ${subject}\n\nMessage Details:\n${message}\n\nSubmitted on: ${dateStr}\nEmergency Hotline: +91 82483 49844`)}`;
+
+    const isDelivered = (formSubmitResult && formSubmitResult.success) || (web3Result && web3Result.success);
+    const needsActivation = formSubmitResult && formSubmitResult.needsActivation;
 
     return {
       success: true,
+      delivered: isDelivered,
+      needsActivation: needsActivation,
+      activationMessage: needsActivation ? formSubmitResult.message : null,
       inquiry: inquiryRecord,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,
@@ -266,8 +323,28 @@ export const smtpService = {
       }
     );
 
-    // 2. Web3Forms dispatch
-    await dispatchViaWeb3Forms({
+    // 2. Dispatch via FormSubmit API
+    const formSubmitResult = await dispatchViaFormSubmit({
+      order_number: orderNumber,
+      client_name: clientName,
+      email: clientEmail,
+      phone: clientPhone,
+      service_domain: serviceName,
+      project_title: title,
+      specifications: description,
+      estimated_budget: budget,
+      target_delivery: timeline,
+      architecture_preference: tech,
+      configured_items: cartSummary,
+      submitted_on: dateStr,
+      receiver: EMAIL_API_CONFIG.receiverEmail,
+      emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
+      _subject: fullSubject,
+      _replyto: clientEmail
+    });
+
+    // 3. Web3Forms dispatch
+    const web3Result = await dispatchViaWeb3Forms({
       order_number: orderNumber,
       name: clientName,
       email: clientEmail,
@@ -286,7 +363,7 @@ export const smtpService = {
       _replyto: clientEmail
     });
 
-    // 3. Local persistence
+    // 4. Local persistence
     const createdOrder = {
       ...orderData,
       id: orderData.id || Date.now(),
@@ -313,11 +390,17 @@ export const smtpService = {
       localStorage.setItem('cognisys_orders', JSON.stringify(existing.slice(0, 50)));
     } catch (e) {}
 
-    // 4. Construct direct Gmail Web URL for instant 1-click dispatch
+    // 5. Construct direct Gmail Web URL for instant 1-click dispatch
     const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nOrder Ref: #${orderNumber}\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nService: ${serviceName}\nProject Title: ${title}\nEstimated Budget: ${budget}\nTimeline: ${timeline}\nTech Preferences: ${tech}\nConfigured Add-ons: ${cartSummary}\n\nProject Specifications:\n${description}\n\nEmergency Helpline: +91 82483 49844`)}`;
+
+    const isDelivered = (formSubmitResult && formSubmitResult.success) || (web3Result && web3Result.success);
+    const needsActivation = formSubmitResult && formSubmitResult.needsActivation;
 
     return {
       success: true,
+      delivered: isDelivered,
+      needsActivation: needsActivation,
+      activationMessage: needsActivation ? formSubmitResult.message : null,
       order: createdOrder,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,
