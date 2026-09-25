@@ -239,30 +239,6 @@ export const OrderWizard = () => {
                   </div>
                 </div>
 
-                {/* 1-Time Form Activation Warning Banner */}
-                {smtpStatus?.needsActivation && (
-                  <div style={{
-                    background: '#FFFBEB',
-                    border: '1.5px solid #F59E0B',
-                    borderRadius: '12px',
-                    padding: '16px 20px',
-                    maxWidth: '560px',
-                    margin: '0 auto 24px',
-                    textAlign: 'left',
-                    boxShadow: '0 4px 12px rgba(245, 158, 11, 0.12)'
-                  }}>
-                    <div style={{ fontWeight: 800, color: '#B45309', marginBottom: '6px', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>⚠️ Action Required: 1-Time Form Activation</span>
-                    </div>
-                    <p style={{ fontSize: '0.86rem', color: '#78350F', lineHeight: 1.55, margin: '0 0 10px 0', fontWeight: 500 }}>
-                      FormSubmit has sent a 1-time activation link to <strong>contact.cognisys@gmail.com</strong>. Please open your Gmail inbox (or Spam folder) and click the <strong>"Activate Form"</strong> button.
-                    </p>
-                    <div style={{ fontSize: '0.82rem', color: '#92400E', fontWeight: 700 }}>
-                      ✦ Once you click it once, all future project specifications will be delivered automatically to your inbox!
-                    </div>
-                  </div>
-                )}
-
                 <div style={{
                   background: '#F8FAFC',
                   border: '1px solid #CBD5E1',
