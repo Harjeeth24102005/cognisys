@@ -40,8 +40,9 @@ export const EMAIL_API_CONFIG = {
 
   // FormSubmit Configuration (100% Free, Unlimited, supports _autoresponse)
   formSubmit: {
-    postEndpoint: 'https://formsubmit.co/contact.cognisys@gmail.com',
-    ajaxEndpoint: 'https://formsubmit.co/ajax/contact.cognisys@gmail.com'
+    token: 'ae72526f8eca0a28ed579f0d030d8f9e',
+    postEndpoint: 'https://formsubmit.co/ae72526f8eca0a28ed579f0d030d8f9e',
+    ajaxEndpoint: 'https://formsubmit.co/ajax/ae72526f8eca0a28ed579f0d030d8f9e'
   }
 };
 
