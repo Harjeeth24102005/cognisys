@@ -24,7 +24,10 @@ export const Contact = () => {
   const [smtpStatus, setSmtpStatus] = useState(null);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       setError('Please fill in all required fields (Name, Email, and Message).');
       return;
@@ -265,123 +268,55 @@ export const Contact = () => {
 
             {/* Right: Interactive Contact Form */}
             <div className="glass-panel" style={{ padding: 'clamp(24px, 5vw, 40px)', background: '#FFFFFF', border: '1px solid rgba(15, 23, 42, 0.1)', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.06)' }}>
-              {submitted ? (
-                <div style={{ textAlign: 'center', padding: '36px 0' }}>
-                  <div style={{
-                    width: '72px',
-                    height: '72px',
-                    borderRadius: '50%',
-                    background: 'rgba(16, 185, 129, 0.12)',
-                    border: '2px solid #10B981',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#10B981',
-                    margin: '0 auto 20px',
-                    boxShadow: '0 0 28px rgba(16, 185, 129, 0.3)'
-                  }}>
-                    <CheckCircle2 size={38} />
-                  </div>
-                  <h3 style={{ fontSize: '1.4rem', color: '#0B132B', fontWeight: 800, marginBottom: '8px' }}>
-                    Inquiry Delivered Directly!
-                  </h3>
-                  <div style={{ display: 'inline-block', background: 'rgba(16, 185, 129, 0.1)', color: '#059669', fontSize: '0.78rem', fontWeight: 700, padding: '4px 14px', borderRadius: '20px', marginBottom: '16px' }}>
-                    ✓ DELIVERED TO CONTACT.COGNISYS@GMAIL.COM
-                  </div>
+              <form id="contact-form" name="contact-form" onSubmit={handleSubmit}>
+                <h3 style={{ fontSize: '1.35rem', color: '#0B132B', fontWeight: 800, marginBottom: '6px' }}>
+                  Send a Direct Message
+                </h3>
+                <p style={{ fontSize: '0.88rem', color: '#1E293B', marginBottom: '24px', fontWeight: 500 }}>
+                  All messages are routed directly to <strong style={{ color: '#0B132B' }}>contact.cognisys@gmail.com</strong>.
+                </p>
 
+                {submitted && (
                   <div style={{
+                    padding: '20px 24px',
+                    borderRadius: '12px',
                     background: '#F0FDF4',
-                    border: '1px solid #BBF7D0',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '16px 20px',
-                    textAlign: 'left',
-                    marginBottom: '20px',
-                    fontSize: '0.9rem',
-                    color: '#166534',
-                    lineHeight: 1.6
-                  }}>
-                    <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
-                      The mail has been delivered to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details.
-                    </p>
-                    <p style={{ margin: '0 0 10px 0' }}>
-                      Client reply email: <strong>{(submittedData || formData).email}</strong>. The Cognisys technical team will review your specifications and contact you soon.
-                    </p>
-                    <div style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #86EFAC',
-                      borderRadius: '8px',
-                      padding: '10px 14px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      fontWeight: 700,
-                      color: '#0F172A'
-                    }}>
-                      <Phone size={18} color="#059669" />
-                      <span>Immediate assistance hotline: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
-                    </div>
-                  </div>
-
-                  {/* Summary of Transmitted Fields */}
-                  <div style={{
-                    background: '#F8FAFC',
-                    border: '1px solid #E2E8F0',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '16px',
-                    textAlign: 'left',
-                    fontSize: '0.84rem',
+                    border: '1.5px solid #22C55E',
                     marginBottom: '24px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px'
+                    boxShadow: '0 6px 20px rgba(34, 197, 94, 0.12)'
                   }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#64748B', fontWeight: 600 }}>Sender:</span>
-                      <span style={{ color: '#0B132B', fontWeight: 700 }}>{(submittedData || formData).name} &lt;{(submittedData || formData).email}&gt;</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                      <div style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '50%',
+                        background: '#22C55E',
+                        color: '#FFFFFF',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0
+                      }}>
+                        <CheckCircle2 size={20} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#14532D' }}>
+                          Message Sent Successfully!
+                        </div>
+                        <div style={{ fontSize: '0.76rem', fontWeight: 700, color: '#16A34A', letterSpacing: '0.4px' }}>
+                          DELIVERED TO CONTACT.COGNISYS@GMAIL.COM
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#64748B', fontWeight: 600 }}>Phone:</span>
-                      <span style={{ color: '#0B132B', fontWeight: 600 }}>{(submittedData || formData).phone || 'Not provided'}</span>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#64748B', fontWeight: 600 }}>Subject:</span>
-                      <span style={{ color: '#0284C7', fontWeight: 700 }}>{(submittedData || formData).subject || 'General Inquiry'}</span>
-                    </div>
-                    <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '8px', marginTop: '4px' }}>
-                      <span style={{ color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Message Details:</span>
-                      <span style={{ color: '#334155', whiteSpace: 'pre-line' }}>{(submittedData || formData).message}</span>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#166534', lineHeight: 1.6 }}>
+                      Thank you{submittedData?.name ? `, ${submittedData.name}` : ''}! Your message has been delivered. Our technical architects will review your specifications and reply to <strong>{submittedData?.email || 'your email'}</strong> shortly.
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.82rem', color: '#15803D', fontWeight: 600 }}>
+                      <Phone size={14} color="#16A34A" />
+                      <span>Direct 24/7 hotline: <a href="tel:8248349844" style={{ color: '#0284C7', textDecoration: 'none' }}>+91 82483 49844</a></span>
                     </div>
                   </div>
-
-                  <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => {
-                        setSubmitted(false);
-                        setSubmittedData(null);
-                        setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
-                      }}
-                      className="btn-primary"
-                      style={{ padding: '12px 24px', fontSize: '0.88rem' }}
-                    >
-                      Send Another Message
-                    </button>
-                    <Link
-                      to="/"
-                      className="btn-secondary"
-                      style={{ textDecoration: 'none', padding: '12px 20px', fontSize: '0.88rem' }}
-                    >
-                      Return to Home
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <form id="contact-form" name="contact-form" action="https://formspree.io/f/mnpnlqpn" method="POST" onSubmit={handleSubmit}>
-                  <h3 style={{ fontSize: '1.35rem', color: '#0B132B', fontWeight: 800, marginBottom: '6px' }}>
-                    Send a Direct Message
-                  </h3>
-                  <p style={{ fontSize: '0.88rem', color: '#1E293B', marginBottom: '24px', fontWeight: 500 }}>
-                    All messages are routed directly to <strong style={{ color: '#0B132B' }}>contact.cognisys@gmail.com</strong>.
-                  </p>
+                )}
 
                   {error && (
                     <div style={{
@@ -507,11 +442,10 @@ export const Contact = () => {
                       style={{ padding: '14px', marginTop: '8px' }}
                     >
                       <Send size={16} />
-                      <span>{loading ? 'Transmitting Inquiries...' : 'Send Message to contact.cognisys@gmail.com'}</span>
+                      <span>{loading ? 'Transmitting Inquiries...' : submitted ? '✓ Message Sent! Send Another' : 'Send Message to contact.cognisys@gmail.com'}</span>
                     </button>
                   </div>
                 </form>
-              )}
             </div>
           </div>
         </div>
