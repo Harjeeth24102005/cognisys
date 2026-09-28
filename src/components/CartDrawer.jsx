@@ -63,7 +63,17 @@ export const CartDrawer = () => {
       setDispatchStatus(orderResult);
 
       if (orderResult && (orderResult.delivered || orderResult.success)) {
-        const res = orderResult.order;
+        const res = orderResult.order || {
+          order_number: `COG-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+          customer_name: customer.name.trim(),
+          customer_email: customer.email.trim(),
+          customer_phone: customer.phone.trim(),
+          service_name: cartItems[0]?.name || 'Custom Multi-Domain Solution',
+          title: `Project Order: ${cartItems.map(i => i.name || i.title).join(' + ')}`,
+          description: combinedDescription,
+          budget: customer.budget,
+          timeline: customer.timeline
+        };
         setCompletedOrder(res);
         setPurchaseSuccess(true);
         setError(null);
@@ -209,7 +219,7 @@ export const CartDrawer = () => {
                       The order specifications have been dispatched to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your configured details.
                     </p>
                     <p style={{ margin: '0 0 10px 0' }}>
-                      Client email set as reply-to: <strong>{completedOrder.customer_email}</strong>. Cognisys engineers will review and respond promptly.
+                      Client email set as reply-to: <strong>{completedOrder?.customer_email || customer.email}</strong>. Cognisys engineers will review and respond promptly.
                     </p>
                     <div style={{
                       background: '#FFFFFF',
@@ -302,19 +312,19 @@ export const CartDrawer = () => {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#64748B', fontWeight: 600 }}>Order ID:</span>
-                  <span style={{ color: '#0284C7', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>#{completedOrder.order_number}</span>
+                  <span style={{ color: '#0284C7', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>#{completedOrder?.order_number || 'COG-2026'}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#64748B', fontWeight: 600 }}>Client Name:</span>
-                  <span style={{ color: '#0F172A', fontWeight: 700 }}>{completedOrder.customer_name}</span>
+                  <span style={{ color: '#0F172A', fontWeight: 700 }}>{completedOrder?.customer_name || customer.name}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#64748B', fontWeight: 600 }}>Contact Email:</span>
-                  <span style={{ color: '#0284C7', fontWeight: 600 }}>{completedOrder.customer_email}</span>
+                  <span style={{ color: '#0284C7', fontWeight: 600 }}>{completedOrder?.customer_email || customer.email}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#64748B', fontWeight: 600 }}>Phone:</span>
-                  <span style={{ color: '#0F172A', fontWeight: 600 }}>{completedOrder.customer_phone}</span>
+                  <span style={{ color: '#0F172A', fontWeight: 600 }}>{completedOrder?.customer_phone || customer.phone}</span>
                 </div>
               </div>
 

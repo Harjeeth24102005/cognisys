@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { 
   CheckCircle2, ArrowRight, ArrowLeft, Eye, Globe, Code, 
-  GraduationCap, Cpu, IndianRupee, Calendar, FileText, Layers, ShieldCheck, Sparkles, Terminal 
+  GraduationCap, Cpu, IndianRupee, Calendar, FileText, Layers, ShieldCheck, Sparkles, Terminal, Phone 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api } from '../services/api';
@@ -117,7 +117,10 @@ export const OrderWizard = () => {
   };
 
   const handleSubmitOrder = async (e) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!formData.customer_name.trim() || !formData.customer_email.trim() || !formData.customer_phone.trim()) {
       setError('Please provide your name, email, and phone number so we can transmit your specifications.');
       return;
@@ -131,8 +134,8 @@ export const OrderWizard = () => {
         customer_email: formData.customer_email.trim(),
         customer_phone: formData.customer_phone.trim(),
         service_name: formData.service_name,
-        title: formData.title,
-        description: formData.description,
+        title: formData.title || 'Technical Project Specification',
+        description: formData.description || 'Full specifications submitted.',
         budget: formData.budget,
         timeline: formData.timeline,
         tech_preferences: formData.tech_preferences,
@@ -141,9 +144,20 @@ export const OrderWizard = () => {
 
       if (res && (res.delivered || res.success)) {
         setSmtpStatus(res);
-        const newOrder = res.order;
+        const newOrder = res.order || {
+          order_number: `COG-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+          customer_name: formData.customer_name.trim(),
+          customer_email: formData.customer_email.trim(),
+          customer_phone: formData.customer_phone.trim(),
+          service_name: formData.service_name || 'AI Engineering Solution',
+          title: formData.title || 'Custom Engineering Project',
+          description: formData.description || 'Full specifications submitted.',
+          budget: formData.budget || 'Custom Quotation',
+          timeline: formData.timeline || 'Standard Delivery'
+        };
         setSubmittedOrder(newOrder);
         setError(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         try {
           confetti({
@@ -221,10 +235,10 @@ export const OrderWizard = () => {
                   lineHeight: 1.6
                 }}>
                   <p style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
-                    The mail has been delivered to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details for <strong>{submittedOrder.title}</strong>.
+                    The mail has been delivered to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span> with all your filled details for <strong>{submittedOrder?.title || formData.title || 'Your Project'}</strong>.
                   </p>
                   <p style={{ margin: '0 0 12px 0' }}>
-                    The Cognisys technical team will review your specifications and contact you soon at <strong>{submittedOrder.customer_email}</strong>.
+                    The Cognisys technical team will review your specifications and contact you soon at <strong>{submittedOrder?.customer_email || formData.customer_email}</strong>.
                   </p>
                   <div style={{
                     background: '#FFFFFF',
@@ -258,39 +272,38 @@ export const OrderWizard = () => {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #E2E8F0', paddingBottom: '6px' }}>
                     <span style={{ color: '#64748B', fontWeight: 700 }}>Reference Code:</span>
-                    <span style={{ color: '#0284C7', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>#{submittedOrder.order_number}</span>
+                    <span style={{ color: '#0284C7', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>#{submittedOrder?.order_number || 'COG-2026'}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: '#64748B', fontWeight: 600 }}>Client Name:</span>
-                    <span style={{ color: '#0B132B', fontWeight: 700 }}>{submittedOrder.customer_name}</span>
+                    <span style={{ color: '#0B132B', fontWeight: 700 }}>{submittedOrder?.customer_name || formData.customer_name}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: '#64748B', fontWeight: 600 }}>Client Email:</span>
-                    <span style={{ color: '#0284C7', fontWeight: 600 }}>{submittedOrder.customer_email}</span>
+                    <span style={{ color: '#0284C7', fontWeight: 600 }}>{submittedOrder?.customer_email || formData.customer_email}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: '#64748B', fontWeight: 600 }}>Client Phone:</span>
-                    <span style={{ color: '#0B132B', fontWeight: 600 }}>{submittedOrder.customer_phone}</span>
+                    <span style={{ color: '#0B132B', fontWeight: 600 }}>{submittedOrder?.customer_phone || formData.customer_phone}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: '#64748B', fontWeight: 600 }}>Service Domain:</span>
-                    <span style={{ color: '#0284C7', fontWeight: 700 }}>{submittedOrder.service_name}</span>
+                    <span style={{ color: '#0284C7', fontWeight: 700 }}>{submittedOrder?.service_name || formData.service_name}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: '#64748B', fontWeight: 600 }}>Project Title:</span>
-                    <span style={{ color: '#0B132B', fontWeight: 700 }}>{submittedOrder.title}</span>
+                    <span style={{ color: '#0B132B', fontWeight: 700 }}>{submittedOrder?.title || formData.title || 'Technical Project'}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ color: '#64748B', fontWeight: 600 }}>Timeline &amp; Budget:</span>
-                    <span style={{ color: '#059669', fontWeight: 700 }}>{submittedOrder.timeline} ({submittedOrder.budget})</span>
+                    <span style={{ color: '#059669', fontWeight: 700 }}>{submittedOrder?.timeline || formData.timeline} ({submittedOrder?.budget || formData.budget})</span>
                   </div>
                   <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: '6px' }}>
                     <span style={{ color: '#64748B', fontWeight: 600, display: 'block', marginBottom: '2px' }}>Specifications:</span>
-                    <span style={{ color: '#334155', whiteSpace: 'pre-line' }}>{submittedOrder.description}</span>
+                    <span style={{ color: '#334155', whiteSpace: 'pre-line' }}>{submittedOrder?.description || formData.description}</span>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
                   <button
                     onClick={() => {
@@ -301,6 +314,7 @@ export const OrderWizard = () => {
                         service_name: '',
                         title: '',
                         description: '',
+                        budget: 'Custom Engineering Quotation',
                         timeline: '2 - 3 Weeks',
                         tech_preferences: '',
                         attachment_filename: '',
@@ -308,6 +322,7 @@ export const OrderWizard = () => {
                         customer_email: '',
                         customer_phone: ''
                       });
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     className="btn-primary"
                     style={{ padding: '12px 28px', fontSize: '0.9rem' }}
@@ -321,7 +336,6 @@ export const OrderWizard = () => {
                   >
                     Return to Home
                   </Link>
-                </div>
                 </div>
               </div>
             ) : (
@@ -726,7 +740,7 @@ export const OrderWizard = () => {
                       style={{ padding: '12px 28px', fontSize: '0.95rem' }}
                     >
                       <Sparkles size={16} />
-                      <span>{loading ? 'Transmitting Specifications via Backend SMTP...' : 'CUSTOMISE & SUBMIT YOUR ORDER'}</span>
+                      <span>{loading ? 'Transmitting Specifications...' : 'CUSTOMISE & SUBMIT YOUR ORDER'}</span>
                       <ArrowRight size={16} />
                     </button>
                   )}

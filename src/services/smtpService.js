@@ -15,7 +15,7 @@ export const EMAIL_API_CONFIG = {
 
   // Formspree API Configuration (https://formspree.io)
   formspree: {
-    formId: import.meta.env.VITE_FORMSPREE_FORM_ID || (typeof localStorage !== 'undefined' ? localStorage.getItem('cognisys_formspree_id') : '') || 'mnpnlqpn',
+    formId: import.meta?.env?.VITE_FORMSPREE_FORM_ID || (typeof localStorage !== 'undefined' ? localStorage.getItem('cognisys_formspree_id') : '') || 'mnpnlqpn',
     endpoint: (id = 'mnpnlqpn') => `https://formspree.io/f/${id}`
   }
 };
