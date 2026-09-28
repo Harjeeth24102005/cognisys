@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   Eye, Globe, Code, GraduationCap, ArrowRight, CheckCircle2, 
   Sparkles, Layers, Cpu, ShieldCheck, ChevronRight 
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { ServiceCard3D } from '../components3d/ServiceCard3D';
 import { api } from '../services/api';
 import { CORE_SERVICES } from '../data/servicesData';
@@ -11,6 +12,25 @@ import { getAssetUrl } from '../utils/assets';
 
 export const Services = () => {
   const [services, setServices] = useState(CORE_SERVICES);
+  const location = useLocation();
+  const [orderSuccessBanner, setOrderSuccessBanner] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.orderSuccess) {
+      setOrderSuccessBanner({
+        orderNumber: location.state.orderNumber || 'COG-2026',
+        serviceName: location.state.serviceName || 'Custom Engineering Solution'
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      try {
+        confetti({
+          particleCount: 130,
+          spread: 85,
+          origin: { y: 0.3 }
+        });
+      } catch (err) {}
+    }
+  }, [location.state]);
 
   useEffect(() => {
     api.getServices()
@@ -46,6 +66,83 @@ export const Services = () => {
       {/* Header */}
       <section style={{ padding: '60px 0 40px', textAlign: 'center', background: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.08) 0%, transparent 60%)' }}>
         <div className="container-custom">
+          {orderSuccessBanner && (
+            <div style={{
+              background: '#F0FDF4',
+              border: '1px solid #86EFAC',
+              borderRadius: '16px',
+              padding: '18px 24px',
+              maxWidth: '740px',
+              margin: '0 auto 28px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '16px',
+              boxShadow: '0 8px 24px rgba(16, 185, 129, 0.12)',
+              textAlign: 'left'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  background: '#DCFCE7',
+                  border: '1px solid #86EFAC',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#15803D',
+                  flexShrink: 0
+                }}>
+                  <CheckCircle2 size={24} />
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '2px' }}>
+                    <span style={{ fontWeight: 800, color: '#166534', fontSize: '1.02rem' }}>
+                      Project Details Submitted Successfully!
+                    </span>
+                    <span style={{
+                      background: 'rgba(16, 185, 129, 0.15)',
+                      color: '#15803D',
+                      fontSize: '0.76rem',
+                      fontWeight: 800,
+                      padding: '2px 8px',
+                      borderRadius: '8px',
+                      fontFamily: 'var(--font-mono)'
+                    }}>
+                      #{orderSuccessBanner.orderNumber}
+                    </span>
+                  </div>
+                  <div style={{ color: '#15803D', fontSize: '0.86rem', lineHeight: 1.4 }}>
+                    Your specifications were delivered to <strong>contact.cognisys@gmail.com</strong>. Our engineering team will review and contact you shortly.
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setOrderSuccessBanner(null)}
+                style={{
+                  background: '#DCFCE7',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '28px',
+                  height: '28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#15803D',
+                  cursor: 'pointer',
+                  fontSize: '1.1rem',
+                  fontWeight: 700,
+                  flexShrink: 0
+                }}
+                title="Dismiss"
+                aria-label="Dismiss banner"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
           <div className="badge badge-cyan" style={{ marginBottom: '14px' }}>
             <Sparkles size={13} color="#00B4D8" />
             <span>SOLUTIONS DIRECTORY</span>

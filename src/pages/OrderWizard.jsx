@@ -166,6 +166,17 @@ export const OrderWizard = () => {
             origin: { y: 0.55 }
           });
         } catch (err) {}
+
+        // Navigate back to the Services page after submitting project details
+        setTimeout(() => {
+          navigate('/services', {
+            state: {
+              orderSuccess: true,
+              orderNumber: newOrder.order_number,
+              serviceName: newOrder.service_name
+            }
+          });
+        }, 1200);
       } else {
         setError(res?.error || 'Failed to submit order specifications. Please try again.');
       }
@@ -330,13 +341,16 @@ export const OrderWizard = () => {
                     Configure Another Project
                   </button>
                   <Link
-                    to="/"
+                    to="/services"
                     className="btn-secondary"
                     style={{ textDecoration: 'none', padding: '12px 24px', fontSize: '0.9rem' }}
                   >
-                    Return to Home
+                    Return to Services
                   </Link>
                 </div>
+                <p style={{ fontSize: '0.85rem', color: '#64748B', marginTop: '16px', marginBottom: 0 }}>
+                  Redirecting automatically to Services catalog...
+                </p>
               </div>
             ) : (
               <div>
