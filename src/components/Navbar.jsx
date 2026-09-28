@@ -319,52 +319,8 @@ export const Navbar = () => {
           </Link>
         </nav>
 
-        {/* Right Side Actions: Cart, Order CTA & Mobile Menu Toggle */}
+        {/* Right Side Actions: Customise Your Order CTA & Mobile Menu Toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Engineering Cart Drawer Trigger */}
-          <button
-            onClick={() => {
-              closeAllDropdowns();
-              setIsCartOpen(true);
-            }}
-            style={{
-              background: '#FFFFFF',
-              border: '1px solid #E2E8F0',
-              borderRadius: 'var(--radius-full)',
-              padding: '7px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '7px',
-              color: '#0F172A',
-              cursor: 'pointer',
-              boxShadow: 'var(--shadow-sm)',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = '#00B4D8';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 180, 216, 0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = '#E2E8F0';
-              e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
-            }}
-          >
-            <ShoppingCart size={16} color="#0284C7" />
-            <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>Cart</span>
-            {totalItemCount > 0 && (
-              <span style={{
-                background: 'linear-gradient(135deg, #0284C7 0%, #00B4D8 100%)',
-                color: '#FFFFFF',
-                borderRadius: '10px',
-                padding: '1px 6px',
-                fontSize: '0.7rem',
-                fontWeight: 800
-              }}>
-                {totalItemCount}
-              </span>
-            )}
-          </button>
-
           {/* Action CTA Button */}
           <Link
             to="/order"
@@ -396,7 +352,7 @@ export const Navbar = () => {
             }}
           >
             <Sparkles size={14} />
-            <span>Configure Project</span>
+            <span>Customise Your Order</span>
           </Link>
 
           {/* Mobile Menu Hamburger Button */}
@@ -506,7 +462,7 @@ export const Navbar = () => {
                 style={{ width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
               >
                 <Sparkles size={15} />
-                <span>Configure Project</span>
+                <span>Customise Your Order</span>
                 <ArrowRight size={15} />
               </Link>
               <Link

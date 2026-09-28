@@ -160,10 +160,10 @@ export const Services = () => {
                       <Link
                         to={`/order?service=${svc.slug}`}
                         className="btn-primary"
-                        style={{ flex: 1, fontSize: '0.85rem', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+                        style={{ flex: 1.3, fontSize: '0.82rem', padding: '10px 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', textDecoration: 'none' }}
                       >
-                        <span>Request</span>
-                        <ArrowRight size={14} />
+                        <Sparkles size={14} />
+                        <span>Customise Your Order</span>
                       </Link>
                     </div>
                   </div>

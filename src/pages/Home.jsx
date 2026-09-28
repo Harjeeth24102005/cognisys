@@ -472,14 +472,14 @@ export const Home = () => {
                         <span>Learn More</span>
                         <ChevronRight size={14} color="#00B4D8" />
                       </Link>
-                      <button
-                        onClick={() => addToCart(svc)}
+                      <Link
+                        to={`/order?service=${svc.slug}`}
                         className="btn-primary"
-                        style={{ padding: '8px 16px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        style={{ padding: '8px 16px', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}
                       >
-                        <ShoppingCart size={14} />
-                        <span>Add to Cart</span>
-                      </button>
+                        <Sparkles size={14} />
+                        <span>Customise Your Order</span>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -593,8 +593,9 @@ export const Home = () => {
                 Whether you require enterprise AI CCTV surveillance, a responsive web platform, or a student capstone prototype, Cognisys turns technology into real solutions.
               </p>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                <Link to="/order" className="btn-primary" style={{ padding: '14px 28px', fontSize: '1rem' }}>
-                  <span>Configure Project Specifications</span>
+                <Link to="/order" className="btn-primary" style={{ padding: '14px 28px', fontSize: '1rem', textDecoration: 'none' }}>
+                  <Sparkles size={16} />
+                  <span>Customise Your Order</span>
                   <ArrowRight size={16} />
                 </Link>
                 <Link to="/contact" className="btn-secondary-light" style={{ padding: '14px 28px', fontSize: '1rem' }}>

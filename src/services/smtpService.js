@@ -1,14 +1,10 @@
 /**
  * Cognisys Clean Modern Frontend Mail Service (Static - No Backend Required)
  * 
- * Supports:
- * 1. Web3Forms API (Direct JSON POST over HTTPS - clean modern API)
- * 2. EmailJS Browser SDK (Direct client-side sending through your verified Gmail)
- * 3. StaticForms API (api.staticforms.xyz/submit)
- * 4. Direct Gmail Web & Native Mailto Protocol (Instant 1-click delivery prefilled with all details)
+ * Primary Provider: Formspree API (https://formspree.io)
+ * Reliable static form endpoint with direct delivery to contact.cognisys@gmail.com
+ * Sets Reply-To header to visitor's email address
  */
-
-import emailjs from '@emailjs/browser';
 
 export const EMAIL_API_CONFIG = {
   // Official Cognisys administrative receiver email
@@ -17,36 +13,10 @@ export const EMAIL_API_CONFIG = {
   // Official direct emergency helpline
   helplinePhone: '8248349844',
 
-  // FormSubmit (Direct zero-registration dispatch using token ae72526f8eca0a28ed579f0d030d8f9e)
-  formSubmit: {
-    token: 'ae72526f8eca0a28ed579f0d030d8f9e',
-    endpoint: 'https://formsubmit.co/ajax/ae72526f8eca0a28ed579f0d030d8f9e'
-  },
-
-  // Resend API (resend.com)
-  resend: {
-    apiKey: import.meta.env.VITE_RESEND_API_KEY || '',
-    from: import.meta.env.VITE_RESEND_FROM || 'Cognisys <onboarding@resend.dev>'
-  },
-
-  // Web3Forms API (Instant JSON submission)
-  web3Forms: {
-    endpoint: 'https://api.web3forms.com/submit',
-    accessKey: '' // Add Web3Forms access key here
-  },
-
-  // EmailJS Configuration (Direct sending through your Gmail)
-  emailJS: {
-    serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
-    templateAdminId: import.meta.env.VITE_EMAILJS_ADMIN_TEMPLATE_ID || '',
-    templateClientId: import.meta.env.VITE_EMAILJS_CLIENT_TEMPLATE_ID || '',
-    publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ''
-  },
-
-  // StaticForms API
-  staticForms: {
-    endpoint: 'https://api.staticforms.xyz/submit',
-    accessKey: ''
+  // Formspree API Configuration (https://formspree.io)
+  formspree: {
+    formId: import.meta.env.VITE_FORMSPREE_FORM_ID || (typeof localStorage !== 'undefined' ? localStorage.getItem('cognisys_formspree_id') : '') || 'mnpnlqpn',
+    endpoint: (id = 'mnpnlqpn') => `https://formspree.io/f/${id}`
   }
 };
 
@@ -78,322 +48,81 @@ function sanitize(input) {
 }
 
 /**
- * Dispatches via FormSubmit API (Zero-config direct dispatch to contact.cognisys@gmail.com)
- * Uses verified token ae72526f8eca0a28ed579f0d030d8f9e
+ * Dispatches via Formspree API (https://formspree.io/f/{formId})
+ * No Cloudflare Turnstile blocks, full CORS support, direct delivery to contact.cognisys@gmail.com
  */
-/**
- * Dispatches via FormSubmit API (Zero-config direct dispatch to contact.cognisys@gmail.com)
- * Uses verified token ae72526f8eca0a28ed579f0d030d8f9e
- */
-async function dispatchViaFormSubmit(payload) {
-  const token = EMAIL_API_CONFIG.formSubmit.token || 'ae72526f8eca0a28ed579f0d030d8f9e';
-  const endpoint = `https://formsubmit.co/ajax/${token}`;
+async function dispatchViaFormspree(payload) {
+  const rawFormId = (
+    EMAIL_API_CONFIG.formspree.formId || 
+    (typeof localStorage !== 'undefined' ? localStorage.getItem('cognisys_formspree_id') : '') || 
+    ''
+  ).trim();
+
+  if (!rawFormId) {
+    return {
+      success: false,
+      delivered: false,
+      needsConfig: true,
+      provider: 'Formspree',
+      error: 'Formspree Form ID is not configured yet. Please provide your Formspree Form ID.'
+    };
+  }
+
+  // Clean formId in case user passed the full URL e.g. https://formspree.io/f/xyz
+  const formId = rawFormId.replace(/^https?:\/\/formspree\.io\/f\//, '').replace(/\/$/, '').trim();
+  const endpoint = `https://formspree.io/f/${formId}`;
 
   const clientEmail = payload.email || payload.customer_email || 'client@cognisys.ai';
   const clientName = payload.name || payload.customer_name || 'Valued Client';
-  const orderNumber = payload.order_number || `COG-2026-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
   const title = payload.project_title || payload.title || payload.subject || 'Website Inquiry';
-  const subject = payload.subject || payload._subject || payload.title || 'General Inquiry';
-  const serviceName = payload.service_domain || payload.service_name || 'General / Custom Engineering';
-  const message = payload.message || payload.description || payload.specifications || payload.inquiry_details || 'No additional specifications provided.';
-  const budget = payload.estimated_budget || payload.budget || 'Custom Quotation';
-  const timeline = payload.target_delivery || payload.timeline || 'Direct Inquiry';
-  const techPreferences = payload.architecture_preference || payload.tech_preferences || 'Recommended Architecture';
-  const phone = payload.phone || payload.customer_phone || 'Not provided';
-  const dateStr = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
-
-  const fullSubject = payload._subject || `[COGNISYS] ${title} - ${clientName}`;
-
-  // FormSubmit payload: all key-value pairs are formatted into the email table delivered directly to contact.cognisys@gmail.com
-  const requestBody = {
-    _subject: fullSubject,
-    _replyto: clientEmail,
-    _captcha: 'false',
-    _template: 'table',
-    'Order / Reference ID': `#${orderNumber}`,
-    'Submission Date & Time': dateStr,
-    'Client Full Name': clientName,
-    'Client Email': clientEmail,
-    'Client Phone Number': phone,
-    'Service / Domain': serviceName,
-    'Project Title / Subject': title,
-    'Requirements & Specifications': message,
-    'Estimated Budget': budget,
-    'Target Delivery Timeline': timeline,
-    'Technology Preferences': techPreferences,
-    'Configured Add-ons & Catalog Items': payload.configured_items || payload.cart_summary || 'None'
-  };
+  const fullSubject = payload._subject || payload.subject || `[COGNISYS] ${title} - ${clientName}`;
 
   try {
+    const cleanPayload = { ...payload };
+    delete cleanPayload._honey;
+    delete cleanPayload._subject;
+    delete cleanPayload._replyto;
+
     const res = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({
+        name: clientName,
+        email: clientEmail,
+        _replyto: clientEmail,
+        subject: fullSubject,
+        ...cleanPayload
+      })
     });
+
     const data = await res.json().catch(() => ({}));
-    if (data.success === 'true' || data.success === true) {
-      return { success: true, provider: 'FormSubmit', message: data.message || 'Delivered to contact.cognisys@gmail.com' };
-    }
-    if (data.message && data.message.toLowerCase().includes('activation')) {
+    if (res.ok && (data.ok || !data.error)) {
       return {
-        success: false,
-        needsActivation: true,
-        provider: 'FormSubmit',
-        message: data.message
+        success: true,
+        delivered: true,
+        provider: 'Formspree',
+        message: 'Delivered directly to ' + EMAIL_API_CONFIG.receiverEmail
       };
     }
-    return { success: false, provider: 'FormSubmit', error: data.message || 'Transmission failed' };
+
+    const errMsg = data.errors ? data.errors.map(e => e.message).join(', ') : (data.error || 'Formspree submission failed');
+    return {
+      success: false,
+      delivered: false,
+      provider: 'Formspree',
+      error: errMsg
+    };
   } catch (err) {
-    console.warn('[FormSubmit] Fetch error:', err);
-    return { success: false, provider: 'FormSubmit', error: err.message };
-  }
-}
-
-/**
- * Dispatches via Resend API (Vite proxy and direct fallback)
- */
-async function dispatchViaResend(payload) {
-  const apiKey = (EMAIL_API_CONFIG.resend.apiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('cognisys_resend_key') : '') || '').trim();
-  if (!apiKey) {
-    return { success: false, provider: 'Resend', error: 'VITE_RESEND_API_KEY is not configured in .env' };
-  }
-
-  const clientEmail = payload.email || payload.customer_email || 'client@cognisys.ai';
-  const clientName = payload.name || payload.customer_name || 'Valued Client';
-  const orderNumber = payload.order_number || `COG-2026-${Math.random().toString(16).slice(2, 8).toUpperCase()}`;
-  const title = payload.project_title || payload.title || payload.subject || 'Website Inquiry';
-  const subject = payload.subject || payload.title || 'General / Custom Inquiry';
-  const serviceName = payload.service_domain || payload.service_name || 'General / Custom Inquiry';
-  const message = payload.message || payload.description || payload.specifications || payload.inquiry_details || 'No additional specifications provided.';
-  const budget = payload.estimated_budget || payload.budget || 'Inquiry';
-  const timeline = payload.target_delivery || payload.timeline || 'Direct Inquiry';
-  const techPreferences = payload.architecture_preference || payload.tech_preferences || 'Default Recommended Stack';
-  const phone = payload.phone || payload.customer_phone || '8248349844';
-  const dateStr = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
-
-  const finalSubject = `[NEW PROJECT ORDER #${orderNumber}] - ${title}`;
-
-  // Exact dark-gold executive specification card matching official Cognisys format
-  const htmlContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>${finalSubject}</title>
-    </head>
-    <body style="margin: 0; padding: 24px 12px; background-color: #050b14; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #FFFFFF;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #0b1528; border: 1px solid #1e293b; border-radius: 14px; padding: 28px 24px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);">
-        
-        <!-- Top Badge -->
-        <div style="margin-bottom: 14px;">
-          <span style="display: inline-block; background-color: #f59e0b; color: #0b132b; font-size: 11px; font-weight: 800; padding: 4px 14px; border-radius: 20px; letter-spacing: 0.5px; text-transform: uppercase;">
-            COGNISYS PROJECT SPECIFICATION
-          </span>
-        </div>
-
-        <!-- Main Order Title -->
-        <h1 style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.3px;">
-          Order #${orderNumber}
-        </h1>
-
-        <!-- Submitted At -->
-        <div style="color: #f59e0b; font-size: 12px; font-weight: 500; margin-bottom: 22px;">
-          Submitted at: ${dateStr}
-        </div>
-
-        <!-- Divider line -->
-        <div style="border-top: 1px solid rgba(245, 158, 11, 0.35); margin-bottom: 20px;"></div>
-
-        <!-- Section 1: Client Contact Details -->
-        <div style="margin-bottom: 16px;">
-          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
-            CLIENT CONTACT DETAILS
-          </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
-            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Name:</strong> <span style="font-weight: 700;">${clientName}</span></div>
-            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Email:</strong> <a href="mailto:${clientEmail}" style="color: #38bdf8; text-decoration: underline; font-weight: 600;">${clientEmail}</a></div>
-            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Phone:</strong> ${phone}</div>
-          </div>
-        </div>
-
-        <!-- Section 2: Project Domain & Title -->
-        <div style="margin-bottom: 16px;">
-          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
-            PROJECT DOMAIN &amp; TITLE
-          </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
-            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Service:</strong> ${serviceName}</div>
-            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Project Title:</strong> <span style="font-weight: 700;">${title}</span></div>
-          </div>
-        </div>
-
-        <!-- Section 3: Requirements & Technical Specifications -->
-        <div style="margin-bottom: 16px;">
-          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
-            REQUIREMENTS &amp; TECHNICAL SPECIFICATIONS
-          </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; line-height: 1.6;">
-            <div style="color: #94a3b8; font-size: 12px; margin-bottom: 4px;">[CONTACT MESSAGE]</div>
-            <div style="color: #cbd5e1; font-weight: 600; margin-bottom: 8px;">Subject: ${subject}</div>
-            <div style="color: #ffffff; white-space: pre-line; word-break: break-word;">${message}</div>
-          </div>
-        </div>
-
-        <!-- Section 4: Budget & Target Delivery Timeline -->
-        <div style="margin-bottom: 16px;">
-          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
-            BUDGET &amp; TARGET DELIVERY TIMELINE
-          </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; line-height: 1.7;">
-            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Estimated Budget:</strong> ${budget}</div>
-            <div style="color: #ffffff;"><strong style="color: #94a3b8; font-weight: 600;">Target Delivery:</strong> ${timeline}</div>
-          </div>
-        </div>
-
-        <!-- Section 5: Tech Stack Preferences -->
-        <div style="margin-bottom: 22px;">
-          <div style="font-size: 11px; font-weight: 800; color: #f59e0b; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;">
-            TECH STACK PREFERENCES
-          </div>
-          <div style="background-color: #101e38; border: 1px solid #1e293b; border-left: 2.5px solid #f59e0b; border-radius: 6px; padding: 14px 16px; font-size: 13px; color: #ffffff;">
-            ${techPreferences}
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div style="border-top: 1px solid #1e293b; padding-top: 18px; font-size: 11px; color: #64748b; text-align: center;">
-          Automated Transmission to <a href="mailto:contact.cognisys@gmail.com" style="color: #38bdf8; text-decoration: none;">contact.cognisys@gmail.com</a> from cognisys.
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-
-  const requestBody = {
-    from: EMAIL_API_CONFIG.resend.from || 'Cognisys <onboarding@resend.dev>',
-    to: [EMAIL_API_CONFIG.receiverEmail],
-    reply_to: clientEmail,
-    subject: finalSubject,
-    html: htmlContent
-  };
-
-  const endpoints = [
-    '/api/resend/emails',
-    'https://api.resend.com/emails'
-  ];
-
-  let lastError = null;
-  for (const ep of endpoints) {
-    try {
-      const res = await fetch(ep, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && (data.id || data.name !== 'validation_error')) {
-        return { success: true, provider: 'Resend', id: data.id };
-      } else {
-        lastError = data.message || `HTTP ${res.status}: ${res.statusText}`;
-      }
-    } catch (err) {
-      lastError = err.message;
-      console.warn(`[Resend] Attempt on ${ep} failed:`, err);
-    }
-  }
-
-  return { success: false, provider: 'Resend', error: lastError || 'Resend dispatch failed' };
-}
-
-/**
- * Dispatches via Web3Forms API
- */
-async function dispatchViaWeb3Forms(payload) {
-  const { endpoint, accessKey } = EMAIL_API_CONFIG.web3Forms;
-  if (!accessKey) return null;
-
-  try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        access_key: accessKey,
-        from_name: payload.name || payload.customer_name || 'Cognisys Visitor',
-        subject: payload._subject || payload.subject,
-        reply_to: payload.email,
-        to: EMAIL_API_CONFIG.receiverEmail,
-        ...payload
-      })
-    });
-
-    const data = await res.json().catch(() => ({}));
-    if (data.success) {
-      return { success: true, provider: 'Web3Forms', message: 'Delivered to ' + EMAIL_API_CONFIG.receiverEmail };
-    }
-    return { success: false, provider: 'Web3Forms', error: data.message };
-  } catch (err) {
-    console.warn('[Web3Forms] Error:', err);
-    return { success: false, provider: 'Web3Forms', error: err.message };
-  }
-}
-
-/**
- * Dispatches via EmailJS if configured
- */
-async function dispatchViaEmailJS(adminParams, clientParams) {
-  const { serviceId, templateAdminId, templateClientId, publicKey } = EMAIL_API_CONFIG.emailJS;
-  if (!serviceId || !publicKey) return null;
-
-  try {
-    const p1 = templateAdminId 
-      ? emailjs.send(serviceId, templateAdminId, adminParams, publicKey)
-      : Promise.resolve();
-
-    const p2 = templateClientId 
-      ? emailjs.send(serviceId, templateClientId, clientParams, publicKey)
-      : Promise.resolve();
-
-    await Promise.all([p1, p2]);
-    return { success: true, provider: 'EmailJS' };
-  } catch (err) {
-    console.warn('EmailJS error:', err);
-    return { success: false, provider: 'EmailJS', error: err.message };
-  }
-}
-
-/**
- * Dispatches via StaticForms API
- */
-async function dispatchViaStaticForms(payload) {
-  const { endpoint, accessKey } = EMAIL_API_CONFIG.staticForms;
-  if (!accessKey) return null;
-
-  try {
-    const res = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        accessKey: accessKey,
-        ...payload
-      })
-    });
-    const data = await res.json().catch(() => ({}));
-    return { success: !!data.success, provider: 'StaticForms' };
-  } catch (err) {
-    return { success: false, provider: 'StaticForms', error: err.message };
+    console.warn('[Formspree] Error:', err);
+    return {
+      success: false,
+      delivered: false,
+      provider: 'Formspree',
+      error: err.message
+    };
   }
 }
 
@@ -405,98 +134,71 @@ export const smtpService = {
     const clientName = sanitize(data.name);
     const clientEmail = sanitize(data.email);
     const clientPhone = sanitize(data.phone || 'Not provided');
-    const subject = sanitize(data.subject || 'General Inquiry');
+    const subject = sanitize(data.subject || 'New Website Enquiry');
+    const service = sanitize(data.service || data.service_name || data.subject || 'General Inquiry');
     const message = sanitize(data.message);
     const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-    const fullSubject = `[COGNISYS CONTACT] ${subject} from ${clientName}`;
+    const fullSubject = `[COGNISYS INQUIRY] ${subject} - ${clientName}`;
 
-    // 1. PRIMARY: FormSubmit (Zero-config direct dispatch to contact.cognisys@gmail.com)
-    const formSubmitResult = await dispatchViaFormSubmit({
-      name: clientName,
-      email: clientEmail,
-      phone: clientPhone,
-      subject: subject,
-      message: message,
-      service_domain: 'General / Contact Inquiry',
-      project_title: subject,
-      _subject: fullSubject
-    });
-
-    // 2. Secondary fallback: Resend API if configured
-    let resendResult = null;
-    if (!formSubmitResult || !formSubmitResult.success) {
-      resendResult = await dispatchViaResend({
-        name: clientName,
-        email: clientEmail,
-        phone: clientPhone,
-        subject: subject,
-        message: message,
-        _subject: fullSubject
-      });
-    }
-
-    // 3. Fallback: Web3Forms if configured
-    let web3Result = null;
-    if ((!formSubmitResult || !formSubmitResult.success) && (!resendResult || !resendResult.success)) {
-      web3Result = await dispatchViaWeb3Forms({
-        name: clientName,
-        email: clientEmail,
-        phone: clientPhone,
-        subject: subject,
-        message: message,
-        submitted_on: dateStr,
-        receiver: EMAIL_API_CONFIG.receiverEmail,
-        emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
-        _subject: fullSubject,
-        _replyto: clientEmail
-      });
-    }
-
-    // 4. Local persistence
     const inquiryRecord = {
       id: 'INQ-' + Date.now().toString(36).toUpperCase(),
       name: clientName,
       email: clientEmail,
       phone: clientPhone,
       subject: subject,
+      service: service,
       message: message,
       date: dateStr,
       receiver: EMAIL_API_CONFIG.receiverEmail,
       helpline: EMAIL_API_CONFIG.helplinePhone
     };
 
-    try {
-      const existing = JSON.parse(localStorage.getItem('cognisys_inquiries') || '[]');
-      existing.unshift(inquiryRecord);
-      localStorage.setItem('cognisys_inquiries', JSON.stringify(existing.slice(0, 50)));
-    } catch (e) {}
+    // Primary Dispatch: Formspree
+    const formspreeRes = await dispatchViaFormspree({
+      'Client Full Name': clientName,
+      'Client Email': clientEmail,
+      'Client Phone Number': clientPhone,
+      'Subject': subject,
+      'Selected Service': service,
+      'Project Requirements / Message': message,
+      'Submitted At': dateStr,
+      name: clientName,
+      email: clientEmail,
+      phone: clientPhone,
+      subject: subject,
+      service: service,
+      message: message,
+      _subject: fullSubject
+    });
 
-    // 5. Construct direct Gmail Web URL for instant 1-click dispatch without any third party
-    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nName: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nSubject: ${subject}\n\nMessage Details:\n${message}\n\nSubmitted on: ${dateStr}\nEmergency Hotline: +91 82483 49844`)}`;
+    if (formspreeRes && formspreeRes.success) {
+      try {
+        const existing = JSON.parse(localStorage.getItem('cognisys_inquiries') || '[]');
+        existing.unshift(inquiryRecord);
+        localStorage.setItem('cognisys_inquiries', JSON.stringify(existing.slice(0, 50)));
+      } catch (e) {}
 
-    const isDelivered = (formSubmitResult && formSubmitResult.success) || 
-                        (resendResult && resendResult.success) || 
-                        (web3Result && web3Result.success);
-
-    const activeProvider = (formSubmitResult && formSubmitResult.success) ? 'FormSubmit' :
-                           (resendResult && resendResult.success) ? 'Resend' :
-                           (web3Result && web3Result.success) ? 'Web3Forms' : null;
-
-    const needsActivation = !!formSubmitResult?.needsActivation;
+      return {
+        success: true,
+        delivered: true,
+        provider: 'Formspree',
+        inquiry: inquiryRecord,
+        receiverEmail: EMAIL_API_CONFIG.receiverEmail,
+        senderEmail: clientEmail,
+        helplinePhone: EMAIL_API_CONFIG.helplinePhone
+      };
+    }
 
     return {
-      success: true,
-      delivered: !!isDelivered,
-      needsActivation: needsActivation,
-      provider: activeProvider,
-      deliveryId: formSubmitResult?.success ? 'FS-OK' : (resendResult?.id || null),
-      error: !isDelivered ? (needsActivation ? 'FormSubmit activation required. Please click "Activate Form" in the email sent to contact.cognisys@gmail.com.' : (formSubmitResult?.error || 'Email dispatch failed')) : null,
-      inquiry: inquiryRecord,
+      success: false,
+      delivered: false,
+      needsConfig: formspreeRes?.needsConfig,
+      provider: 'Formspree',
+      error: formspreeRes?.error || 'Email dispatch failed. Please check your network connection or try again.',
+      inquiry: null,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,
-      helplinePhone: EMAIL_API_CONFIG.helplinePhone,
-      gmailComposeUrl,
-      mailtoUrl: this.buildMailtoUrl(EMAIL_API_CONFIG.receiverEmail, clientEmail, fullSubject, `Name: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\n\nMessage:\n${message}`)
+      helplinePhone: EMAIL_API_CONFIG.helplinePhone
     };
   },
 
@@ -515,7 +217,7 @@ export const smtpService = {
     const tech = sanitize(orderData.tech_preferences || 'Modern Architecture');
     const orderNumber = orderData.order_number || `COG-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const dateStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
-    const fullSubject = `[COGNISYS ORDER #${orderNumber}] ${title} - ${clientName}`;
+    const fullSubject = `[COGNISYS ORDER #${orderNumber}] ${serviceName} - ${title}`;
 
     let cartSummary = 'None';
     if (Array.isArray(orderData.cart_items) && orderData.cart_items.length > 0) {
@@ -529,65 +231,6 @@ export const smtpService = {
       } catch (e) {}
     }
 
-    // 1. PRIMARY: FormSubmit (Zero-config direct dispatch to contact.cognisys@gmail.com)
-    const formSubmitResult = await dispatchViaFormSubmit({
-      order_number: orderNumber,
-      name: clientName,
-      email: clientEmail,
-      phone: clientPhone,
-      service_domain: serviceName,
-      project_title: title,
-      specifications: description,
-      estimated_budget: budget,
-      target_delivery: timeline,
-      tech_preferences: tech,
-      configured_items: cartSummary,
-      _subject: fullSubject
-    });
-
-    // 2. Secondary fallback: Resend API if configured
-    let resendResult = null;
-    if (!formSubmitResult || !formSubmitResult.success) {
-      resendResult = await dispatchViaResend({
-        order_number: orderNumber,
-        client_name: clientName,
-        email: clientEmail,
-        phone: clientPhone,
-        service_domain: serviceName,
-        project_title: title,
-        specifications: description,
-        estimated_budget: budget,
-        target_delivery: timeline,
-        architecture_preference: tech,
-        configured_items: cartSummary,
-        _subject: fullSubject
-      });
-    }
-
-    // 3. Fallback: Web3Forms if configured
-    let web3Result = null;
-    if ((!formSubmitResult || !formSubmitResult.success) && (!resendResult || !resendResult.success)) {
-      web3Result = await dispatchViaWeb3Forms({
-        order_number: orderNumber,
-        name: clientName,
-        email: clientEmail,
-        phone: clientPhone,
-        service_domain: serviceName,
-        project_title: title,
-        specifications: description,
-        estimated_budget: budget,
-        target_delivery: timeline,
-        architecture_preference: tech,
-        configured_items: cartSummary,
-        submitted_on: dateStr,
-        receiver: EMAIL_API_CONFIG.receiverEmail,
-        emergency_helpline: EMAIL_API_CONFIG.helplinePhone,
-        _subject: fullSubject,
-        _replyto: clientEmail
-      });
-    }
-
-    // 4. Local persistence
     const createdOrder = {
       ...orderData,
       id: orderData.id || Date.now(),
@@ -608,38 +251,60 @@ export const smtpService = {
       helpline: EMAIL_API_CONFIG.helplinePhone
     };
 
-    try {
-      const existing = JSON.parse(localStorage.getItem('cognisys_orders') || '[]');
-      existing.unshift(createdOrder);
-      localStorage.setItem('cognisys_orders', JSON.stringify(existing.slice(0, 50)));
-    } catch (e) {}
+    const formspreeRes = await dispatchViaFormspree({
+      'Order / Reference ID': `#${orderNumber}`,
+      'Submission Date & Time': dateStr,
+      'Client Full Name': clientName,
+      'Client Email': clientEmail,
+      'Client Phone Number': clientPhone,
+      'Service / Domain': serviceName,
+      'Project Title / Subject': title,
+      'Requirements & Specifications': description,
+      'Estimated Budget': budget,
+      'Target Delivery Timeline': timeline,
+      'Technology Preferences': tech,
+      'Configured Add-ons': cartSummary,
+      order_number: orderNumber,
+      name: clientName,
+      email: clientEmail,
+      phone: clientPhone,
+      service_domain: serviceName,
+      project_title: title,
+      specifications: description,
+      estimated_budget: budget,
+      target_delivery: timeline,
+      tech_preferences: tech,
+      _subject: fullSubject
+    });
 
-    // 5. Construct direct Gmail Web URL for instant 1-click dispatch
-    const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(EMAIL_API_CONFIG.receiverEmail)}&cc=${encodeURIComponent(clientEmail)}&su=${encodeURIComponent(fullSubject)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nOrder Ref: #${orderNumber}\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\nService: ${serviceName}\nProject Title: ${title}\nEstimated Budget: ${budget}\nTimeline: ${timeline}\nTech Preferences: ${tech}\nConfigured Add-ons: ${cartSummary}\n\nProject Specifications:\n${description}\n\nEmergency Helpline: +91 82483 49844`)}`;
+    if (formspreeRes && formspreeRes.success) {
+      try {
+        const existing = JSON.parse(localStorage.getItem('cognisys_orders') || '[]');
+        existing.unshift(createdOrder);
+        localStorage.setItem('cognisys_orders', JSON.stringify(existing.slice(0, 50)));
+      } catch (e) {}
 
-    const isDelivered = (formSubmitResult && formSubmitResult.success) || 
-                        (resendResult && resendResult.success) || 
-                        (web3Result && web3Result.success);
-
-    const activeProvider = (formSubmitResult && formSubmitResult.success) ? 'FormSubmit' :
-                           (resendResult && resendResult.success) ? 'Resend' :
-                           (web3Result && web3Result.success) ? 'Web3Forms' : null;
-
-    const needsActivation = !!formSubmitResult?.needsActivation;
+      return {
+        success: true,
+        delivered: true,
+        provider: 'Formspree',
+        order: createdOrder,
+        receiverEmail: EMAIL_API_CONFIG.receiverEmail,
+        senderEmail: clientEmail,
+        helplinePhone: EMAIL_API_CONFIG.helplinePhone
+      };
+    }
 
     return {
-      success: true,
-      delivered: !!isDelivered,
-      needsActivation: needsActivation,
-      provider: activeProvider,
-      deliveryId: formSubmitResult?.success ? 'FS-OK' : (resendResult?.id || null),
-      error: !isDelivered ? (needsActivation ? 'FormSubmit activation required. Please click "Activate Form" in the email sent to contact.cognisys@gmail.com.' : (formSubmitResult?.error || 'Email dispatch failed')) : null,
-      order: createdOrder,
+      success: false,
+      delivered: false,
+      needsConfig: formspreeRes?.needsConfig,
+      provider: 'Formspree',
+      error: formspreeRes?.error || 'Order specification dispatch failed.',
+      order: null,
       receiverEmail: EMAIL_API_CONFIG.receiverEmail,
       senderEmail: clientEmail,
-      helplinePhone: EMAIL_API_CONFIG.helplinePhone,
-      gmailComposeUrl,
-      mailtoUrl: this.buildMailtoUrl(EMAIL_API_CONFIG.receiverEmail, clientEmail, fullSubject, `Order #${orderNumber}\nClient: ${clientName}\nEmail: ${clientEmail}\nPhone: ${clientPhone}\n\nSpecifications:\n${description}`)
+      helplinePhone: EMAIL_API_CONFIG.helplinePhone
     };
   },
 

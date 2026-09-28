@@ -123,7 +123,7 @@ export const MobileQuickBar = () => {
         </span>
       </a>
 
-      {/* 3. Featured Build Order CTA - Symmetrically aligned with icon row and label baseline */}
+      {/* 3. Featured Customise Your Order CTA */}
       <Link
         to="/order"
         style={{
@@ -134,11 +134,11 @@ export const MobileQuickBar = () => {
           gap: '3px',
           textDecoration: 'none',
           padding: '2px 0',
-          flex: 1,
+          flex: 1.2,
           minWidth: 0
         }}
         className="mobile-tap-active"
-        aria-label="Build Order"
+        aria-label="Customise Your Order"
       >
         <div style={{
           width: '34px',
@@ -167,77 +167,9 @@ export const MobileQuickBar = () => {
           lineHeight: '1.2',
           whiteSpace: 'nowrap'
         }}>
-          Build Order
+          Customise Order
         </span>
       </Link>
-
-      {/* 4. Engineering Cart Drawer Trigger with Badge */}
-      <button
-        type="button"
-        onClick={() => setIsCartOpen(true)}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '3px',
-          background: 'transparent',
-          border: 'none',
-          color: '#0F172A',
-          padding: '2px 0',
-          cursor: 'pointer',
-          flex: 1,
-          minWidth: 0
-        }}
-        className="mobile-tap-active"
-        aria-label="Open engineering cart"
-      >
-        <div style={{
-          width: '32px',
-          height: '32px',
-          borderRadius: '50%',
-          background: 'rgba(2, 132, 199, 0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#0284C7',
-          position: 'relative',
-          flexShrink: 0
-        }}>
-          <ShoppingCart size={15} />
-          {totalItemCount > 0 && (
-            <span style={{
-              position: 'absolute',
-              top: '-3px',
-              right: '-4px',
-              background: '#0284C7',
-              color: '#FFFFFF',
-              fontSize: '0.6rem',
-              fontWeight: 800,
-              fontFamily: 'var(--font-mono)',
-              width: '16px',
-              height: '16px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '2px solid #FFFFFF',
-              boxShadow: '0 2px 5px rgba(2, 132, 199, 0.4)'
-            }}>
-              {totalItemCount}
-            </span>
-          )}
-        </div>
-        <span style={{ 
-          fontSize: '0.68rem', 
-          fontWeight: 700, 
-          fontFamily: 'var(--font-mono)',
-          lineHeight: '1.2',
-          whiteSpace: 'nowrap'
-        }}>
-          Cart
-        </span>
-      </button>
 
       {/* 5. Services Directory */}
       <Link

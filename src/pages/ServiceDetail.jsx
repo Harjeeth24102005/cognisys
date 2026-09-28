@@ -97,8 +97,9 @@ export const ServiceDetail = () => {
               </p>
 
               <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-                <Link to={`/order?service=${service.slug}`} className="btn-primary" style={{ padding: '12px 24px' }}>
-                  <span>Request This Service</span>
+                <Link to={`/order?service=${service.slug}`} className="btn-primary" style={{ padding: '12px 24px', textDecoration: 'none' }}>
+                  <Sparkles size={16} />
+                  <span>Customise Your Order</span>
                   <ArrowRight size={16} />
                 </Link>
                 <Link to="/contact" className="btn-secondary" style={{ padding: '12px 24px' }}>
@@ -275,8 +276,9 @@ export const ServiceDetail = () => {
             <p style={{ fontSize: '1rem', color: '#1E293B', maxWidth: '580px', margin: '0 auto 28px', lineHeight: 1.6 }}>
               Submit your project specifications and receive an official quotation and architecture plan directly on your customer dashboard.
             </p>
-            <Link to={`/order?service=${service.slug}`} className="btn-primary" style={{ padding: '14px 32px' }}>
-              <span>Request This Service Now</span>
+            <Link to={`/order?service=${service.slug}`} className="btn-primary" style={{ padding: '14px 32px', textDecoration: 'none' }}>
+              <Sparkles size={16} />
+              <span>Customise Your Order</span>
               <ArrowRight size={16} />
             </Link>
           </div>

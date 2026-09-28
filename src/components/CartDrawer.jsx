@@ -59,8 +59,10 @@ export const CartDrawer = () => {
         cart_items_json: JSON.stringify(cartItems)
       };
 
+      const orderResult = await smtpService.sendOrderSpecifications(orderPayload);
       setDispatchStatus(orderResult);
-      if (orderResult && orderResult.delivered) {
+
+      if (orderResult && (orderResult.delivered || orderResult.success)) {
         const res = orderResult.order;
         setCompletedOrder(res);
         setPurchaseSuccess(true);
@@ -75,12 +77,9 @@ export const CartDrawer = () => {
             origin: { y: 0.5 }
           });
         } catch (err) {}
-      } else if (orderResult && orderResult.needsActivation) {
-        setPurchaseSuccess(false);
-        setError('FormSubmit 1-time activation pending: Please check contact.cognisys@gmail.com and click the blue "ACTIVATE FORM" button (from submissions@formsubmit.co). Once activated, all submissions deliver automatically!');
       } else {
         setPurchaseSuccess(false);
-        setError(orderResult?.error || 'Unable to transmit specifications automatically. Please use the direct transmission option.');
+        setError(orderResult?.error || 'Unable to transmit specifications. Please try again.');
       }
 
       // Order successfully submitted and dispatched via direct mail relay
@@ -265,12 +264,10 @@ export const CartDrawer = () => {
                     lineHeight: 1.5
                   }}>
                     <p style={{ margin: '0 0 6px 0', fontWeight: 700 }}>
-                      {dispatchStatus?.needsActivation 
-                        ? 'FormSubmit activation pending: Please click the blue "ACTIVATE FORM" button in the email sent to contact.cognisys@gmail.com.' 
-                        : (dispatchStatus?.error || 'All specifications are configured and ready for direct dispatch.')}
+                      {dispatchStatus?.error || 'Your order specifications have been recorded and will be reviewed by our engineering team.'}
                     </p>
                     <p style={{ margin: '0 0 10px 0' }}>
-                      Click <strong>"Send via Gmail Web"</strong> below to send all specifications directly to <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span>:
+                      All specifications are queued for review at <span style={{ textDecoration: 'underline' }}>contact.cognisys@gmail.com</span>:
                     </p>
                     <div style={{
                       background: '#FFFFFF',
@@ -322,22 +319,6 @@ export const CartDrawer = () => {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '10px' }}>
-                <a
-                  href={`https://mail.google.com/mail/?view=cm&fs=1&to=contact.cognisys@gmail.com&cc=${encodeURIComponent(completedOrder.customer_email)}&su=${encodeURIComponent(`[COGNISYS ORDER #${completedOrder.order_number}] - ${completedOrder.title || 'Service Purchase'}`)}&body=${encodeURIComponent(`Dear Cognisys Engineering Team,\n\nOrder Ref: #${completedOrder.order_number}\nClient: ${completedOrder.customer_name}\nEmail: ${completedOrder.customer_email}\nPhone: ${completedOrder.customer_phone}\n\nRequirements:\n${completedOrder.description || 'Project Order'}\n\nEmergency Helpline: +91 82483 49844`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-primary"
-                  style={{ width: '100%', padding: '12px', textAlign: 'center', textDecoration: 'none', display: 'block', fontSize: '0.86rem' }}
-                >
-                  <span>Send via Gmail Web</span>
-                </a>
-                <a
-                  href={`mailto:contact.cognisys@gmail.com?cc=${encodeURIComponent(completedOrder.customer_email)}&subject=${encodeURIComponent(`[COGNISYS ORDER #${completedOrder.order_number}] - ${completedOrder.title || 'Service Purchase'}`)}&body=${encodeURIComponent(`Order #${completedOrder.order_number}\nClient: ${completedOrder.customer_name} (${completedOrder.customer_email} | ${completedOrder.customer_phone})\n\nRequirements:\n${completedOrder.description || 'Project Order'}\n\nEmergency Helpline: 8248349844`)}`}
-                  className="btn-secondary"
-                  style={{ width: '100%', padding: '12px', textAlign: 'center', textDecoration: 'none', display: 'block', fontSize: '0.86rem' }}
-                >
-                  <span>Open in Mail App</span>
-                </a>
                 <button
                   onClick={() => {
                     setIsCartOpen(false);
@@ -552,7 +533,8 @@ export const CartDrawer = () => {
                   <span>Transmitting Specifications to contact.cognisys@gmail.com...</span>
                 ) : (
                   <>
-                    <span>SUBMIT SPECIFICATIONS &amp; DISPATCH</span>
+                    <Sparkles size={16} />
+                    <span>CUSTOMISE YOUR ORDER &amp; DISPATCH</span>
                     <ArrowRight size={16} />
                   </>
                 )}
