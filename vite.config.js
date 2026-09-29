@@ -68,7 +68,7 @@ export default defineConfig(({ mode }) => {
         }
       },
       watch: {
-        ignored: ['**/docs/**', '**/dist/**']
+        ignored: ['**/docs/**', '**/dist/**', '**/*.mp4', '**/backend/**']
       }
     }
   };
