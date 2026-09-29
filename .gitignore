@@ -60,3 +60,6 @@ yarn-error.log*
 *.sw?
 .DS_Store
 Thumbs.db
+
+# Root media files (actual assets are in public/ and docs/)
+/*.mp4

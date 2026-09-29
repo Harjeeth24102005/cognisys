@@ -10,6 +10,7 @@ import { api } from '../services/api';
 import { CORE_SERVICES } from '../data/servicesData';
 import introVideo from '../assets/intro-video.mp4';
 import { getAssetUrl } from '../utils/assets';
+import { ServiceCard3D } from '../components3d/ServiceCard3D';
 
 export const Home = () => {
   const [services, setServices] = useState(CORE_SERVICES);
@@ -381,18 +382,15 @@ export const Home = () => {
                     height: '100%'
                   }}
                 >
-                  {/* Topic Image Banner */}
-                  <div className="service-card-banner">
-                    <img
-                      src={cardImage}
-                      alt={svc.name}
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = getAssetUrl('/images/card-software.jpg');
-                      }}
+                  {/* Topic Video Background Banner */}
+                  <div className="service-card-banner" style={{ position: 'relative', overflow: 'hidden' }}>
+                    <ServiceCard3D
+                      slug={svc.slug}
+                      name={svc.name}
+                      poster={cardImage}
+                      isThumbnail={true}
                     />
-                    <div className="service-card-overlay" />
+                    <div className="service-card-overlay" style={{ pointerEvents: 'none' }} />
 
                     {/* Floating Squircle & Category Pill */}
                     <div style={{

@@ -1,306 +1,440 @@
-import React, { useRef, useState, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Box, Sphere, Torus, Cylinder, Line } from '@react-three/drei';
-import * as THREE from 'three';
+import React, { useRef, useState, useEffect } from 'react';
+import { Play, Pause, Volume2, VolumeX, Maximize2 } from 'lucide-react';
+import { getAssetUrl } from '../utils/assets';
 
-// 1. FACE TRACKING & BIOMETRIC VISION ANIMATION (AI CCTV)
-const FaceTrackingSystem = ({ isHovered }) => {
-  const groupRef = useRef();
-  const scanLineRef = useRef();
-  const boundingBoxRef = useRef();
+// Map of services to their video files named with the exact service names
+const SERVICE_VIDEOS = {
+  // 1. AI-Based CCTV Attendance Monitoring System
+  'ai-cctv-attendance': {
+    filename: 'AI-Based CCTV Attendance Monitoring System.mp4',
+    altFilename: 'ai-cctv-attendance.mp4',
+    name: 'AI-Based CCTV Attendance Monitoring System'
+  },
+  'ai-cctv': {
+    filename: 'AI-Based CCTV Attendance Monitoring System.mp4',
+    altFilename: 'ai-cctv-attendance.mp4',
+    name: 'AI-Based CCTV Attendance Monitoring System'
+  },
+  'AI-Based CCTV Attendance Monitoring System': {
+    filename: 'AI-Based CCTV Attendance Monitoring System.mp4',
+    altFilename: 'ai-cctv-attendance.mp4',
+    name: 'AI-Based CCTV Attendance Monitoring System'
+  },
 
-  useFrame((state, delta) => {
-    const t = state.clock.getElapsedTime();
-    if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(t * 1.2) * (isHovered ? 0.45 : 0.25);
-      groupRef.current.rotation.x = Math.cos(t * 0.8) * 0.1;
-    }
-    if (scanLineRef.current) {
-      scanLineRef.current.position.y = Math.sin(t * 3.0) * 0.7;
-    }
-    if (boundingBoxRef.current) {
-      const scale = 1 + Math.sin(t * 4) * 0.03;
-      boundingBoxRef.current.scale.set(scale, scale, 1);
-    }
-  });
+  // 2. Websites & Modern Web Development
+  'websites': {
+    filename: 'Websites & Modern Web Development.mp4',
+    altFilename: 'websites.mp4',
+    name: 'Websites & Modern Web Development'
+  },
+  'web-development': {
+    filename: 'Websites & Modern Web Development.mp4',
+    altFilename: 'websites.mp4',
+    name: 'Websites & Modern Web Development'
+  },
+  'Websites & Modern Web Development': {
+    filename: 'Websites & Modern Web Development.mp4',
+    altFilename: 'websites.mp4',
+    name: 'Websites & Modern Web Development'
+  },
 
-  return (
-    <group ref={groupRef} position={[0, 0, 0]}>
-      {/* 3D Stylized Biometric Face Mesh */}
-      <group position={[0, 0, 0]}>
-        <Sphere args={[0.65, 16, 16]} scale={[0.85, 1.05, 0.75]}>
-          <meshStandardMaterial
-            color="#0F172A"
-            wireframe
-            emissive="#00B4D8"
-            emissiveIntensity={isHovered ? 2.0 : 1.0}
-          />
-        </Sphere>
-        
-        <Box args={[0.55, 0.4, 0.4]} position={[0, -0.65, 0.1]}>
-          <meshStandardMaterial
-            color="#0F172A"
-            wireframe
-            emissive="#0284C7"
-            emissiveIntensity={isHovered ? 1.8 : 0.8}
-          />
-        </Box>
+  // 3. AI-Based Projects
+  'ai-projects': {
+    filename: 'AI-Based Projects.mp4',
+    altFilename: 'ai-projects.mp4',
+    name: 'AI-Based Projects'
+  },
+  'AI-Based Projects': {
+    filename: 'AI-Based Projects.mp4',
+    altFilename: 'ai-projects.mp4',
+    name: 'AI-Based Projects'
+  },
 
-        {/* Eyes Landmark Nodes */}
-        <Sphere args={[0.07, 12, 12]} position={[-0.24, 0.12, 0.5]}>
-          <meshBasicMaterial color="#00B4D8" />
-        </Sphere>
-        <Sphere args={[0.07, 12, 12]} position={[0.24, 0.12, 0.5]}>
-          <meshBasicMaterial color="#00B4D8" />
-        </Sphere>
+  // 4. Python-Based Projects
+  'python-projects': {
+    filename: 'Python-Based Projects.mp4',
+    altFilename: 'python-projects.mp4',
+    name: 'Python-Based Projects'
+  },
+  'software-development': {
+    filename: 'Python-Based Projects.mp4',
+    altFilename: 'python-projects.mp4',
+    name: 'Python-Based Projects'
+  },
+  'Python-Based Projects': {
+    filename: 'Python-Based Projects.mp4',
+    altFilename: 'python-projects.mp4',
+    name: 'Python-Based Projects'
+  },
 
-        {/* Nose Landmark Point */}
-        <Sphere args={[0.05, 12, 12]} position={[0, -0.1, 0.58]}>
-          <meshBasicMaterial color="#7C3AED" />
-        </Sphere>
+  // 5. Final Year Projects
+  'final-year-projects': {
+    filename: 'Final Year Projects.mp4',
+    altFilename: 'final-year-projects.mp4',
+    name: 'Final Year Projects'
+  },
+  'student-projects': {
+    filename: 'Final Year Projects.mp4',
+    altFilename: 'final-year-projects.mp4',
+    name: 'Final Year Projects'
+  },
+  'Final Year Projects': {
+    filename: 'Final Year Projects.mp4',
+    altFilename: 'final-year-projects.mp4',
+    name: 'Final Year Projects'
+  },
 
-        {/* Mouth Landmark Array */}
-        <Sphere args={[0.04, 10, 10]} position={[-0.14, -0.38, 0.45]}>
-          <meshBasicMaterial color="#00B4D8" />
-        </Sphere>
-        <Sphere args={[0.04, 10, 10]} position={[0, -0.4, 0.5]}>
-          <meshBasicMaterial color="#0284C7" />
-        </Sphere>
-        <Sphere args={[0.04, 10, 10]} position={[0.14, -0.38, 0.45]}>
-          <meshBasicMaterial color="#00B4D8" />
-        </Sphere>
-      </group>
-
-      {/* Target Bounding Box */}
-      <group ref={boundingBoxRef} position={[0, -0.05, 0.6]}>
-        <Line points={[[-0.65, 0.6, 0], [-0.85, 0.6, 0], [-0.85, 0.4, 0]]} color="#00B4D8" lineWidth={2.5} />
-        <Line points={[[0.65, 0.6, 0], [0.85, 0.6, 0], [0.85, 0.4, 0]]} color="#00B4D8" lineWidth={2.5} />
-        <Line points={[[-0.65, -0.7, 0], [-0.85, -0.7, 0], [-0.85, -0.5, 0]]} color="#00B4D8" lineWidth={2.5} />
-        <Line points={[[0.65, -0.7, 0], [0.85, -0.7, 0], [0.85, -0.5, 0]]} color="#00B4D8" lineWidth={2.5} />
-
-        {/* Sweeping Laser Scan Line */}
-        <group ref={scanLineRef}>
-          <Line points={[[-0.8, 0, 0], [0.8, 0, 0]]} color="#7C3AED" lineWidth={3} />
-        </group>
-      </group>
-    </group>
-  );
+  // 6. Face Recognition System
+  'face-recognition': {
+    filename: 'Face Recognition System.mp4',
+    altFilename: 'face-recognition.mp4',
+    name: 'Face Recognition System'
+  },
+  'Face Recognition System': {
+    filename: 'Face Recognition System.mp4',
+    altFilename: 'face-recognition.mp4',
+    name: 'Face Recognition System'
+  }
 };
 
-// 2. WEB DEVELOPMENT ANIMATION
-const WebDevSystem = ({ isHovered }) => {
-  const windowRef = useRef();
-  const codeTagRef = useRef();
+/**
+ * Resolve video file source for a given service slug or name
+ */
+export function getServiceVideoData(identifier) {
+  if (!identifier) return null;
+  const key = typeof identifier === 'string' ? identifier.trim() : '';
+  const item = SERVICE_VIDEOS[key];
+  if (item) {
+    return {
+      primaryUrl: getAssetUrl(`/videos/${encodeURIComponent(item.filename)}`),
+      name: item.name
+    };
+  }
+  // Generic fallback if not matched directly
+  return {
+    primaryUrl: getAssetUrl(`/videos/${encodeURIComponent(key)}.mp4`),
+    name: key
+  };
+}
 
-  useFrame((state, delta) => {
-    const t = state.clock.getElapsedTime();
-    if (windowRef.current) {
-      windowRef.current.rotation.y = Math.sin(t * 0.9) * 0.25;
-      windowRef.current.rotation.x = Math.cos(t * 0.7) * 0.12;
-    }
-    if (codeTagRef.current) {
-      codeTagRef.current.position.z = 0.35 + Math.sin(t * 2.5) * 0.08;
-    }
-  });
+/**
+ * ServiceCard3D Component
+ * Replaces the Three.js 3D animation with the respective service video background
+ */
+export const ServiceCard3D = ({
+  slug,
+  name,
+  poster,
+  isThumbnail = false,
+  className = '',
+  style = {}
+}) => {
+  const videoRef = useRef(null);
+  const containerRef = useRef(null);
 
-  return (
-    <group ref={windowRef}>
-      {/* Sleek Browser Window Pane */}
-      <Box args={[1.7, 1.1, 0.08]} position={[0, 0, 0]}>
-        <meshStandardMaterial
-          color="#0F172A"
-          roughness={0.2}
-          metalness={0.8}
-        />
-      </Box>
-
-      {/* Top Header Controls */}
-      <Box args={[1.7, 0.18, 0.09]} position={[0, 0.46, 0.01]}>
-        <meshStandardMaterial color="#1E293B" />
-      </Box>
-      <Sphere args={[0.035, 12, 12]} position={[-0.7, 0.46, 0.06]}>
-        <meshBasicMaterial color="#ef4444" />
-      </Sphere>
-      <Sphere args={[0.035, 12, 12]} position={[-0.6, 0.46, 0.06]}>
-        <meshBasicMaterial color="#f59e0b" />
-      </Sphere>
-      <Sphere args={[0.035, 12, 12]} position={[-0.5, 0.46, 0.06]}>
-        <meshBasicMaterial color="#10b981" />
-      </Sphere>
-
-      {/* Code Brackets in Brand Cyan & Violet */}
-      <group ref={codeTagRef} position={[0, -0.05, 0.3]}>
-        <Line points={[[-0.35, 0.2, 0], [-0.5, 0, 0], [-0.35, -0.2, 0]]} color="#00B4D8" lineWidth={3.5} />
-        <Line points={[[-0.1, -0.22, 0], [0.1, 0.22, 0]]} color="#7C3AED" lineWidth={3.5} />
-        <Line points={[[0.35, 0.2, 0], [0.5, 0, 0], [0.35, -0.2, 0]]} color="#0284C7" lineWidth={3.5} />
-      </group>
-
-      {/* Floating 3D React Sphere */}
-      <Sphere args={[0.1, 16, 16]} position={[0, -0.02, 0.15]}>
-        <meshStandardMaterial color="#00B4D8" emissive="#00B4D8" emissiveIntensity={1.8} />
-      </Sphere>
-      <Torus args={[0.3, 0.018, 16, 48]} rotation={[Math.PI / 3, 0, 0]} position={[0, -0.02, 0.15]}>
-        <meshBasicMaterial color="#00B4D8" wireframe />
-      </Torus>
-    </group>
-  );
-};
-
-// 3. ENTERPRISE SOFTWARE ARCHITECTURE ANIMATION
-const SoftwareSystem = ({ isHovered }) => {
-  const stackRef = useRef();
-  const c1Ref = useRef();
-  const c2Ref = useRef();
-  const c3Ref = useRef();
-
-  useFrame((state, delta) => {
-    const t = state.clock.getElapsedTime();
-    if (stackRef.current) {
-      stackRef.current.rotation.y += delta * (isHovered ? 0.8 : 0.4);
-    }
-    if (c1Ref.current) c1Ref.current.position.y = 0.45 + Math.sin(t * 2) * 0.04;
-    if (c2Ref.current) c2Ref.current.position.y = 0.0;
-    if (c3Ref.current) c3Ref.current.position.y = -0.45 - Math.sin(t * 2) * 0.04;
-  });
-
-  return (
-    <group ref={stackRef}>
-      {/* Top API Layer */}
-      <group ref={c1Ref}>
-        <Cylinder args={[0.65, 0.65, 0.18, 24]}>
-          <meshStandardMaterial
-            color="#0F172A"
-            emissive="#00B4D8"
-            emissiveIntensity={0.8}
-            metalness={0.9}
-            roughness={0.2}
-          />
-        </Cylinder>
-        <Torus args={[0.67, 0.015, 16, 40]} rotation={[Math.PI / 2, 0, 0]}>
-          <meshBasicMaterial color="#00B4D8" />
-        </Torus>
-      </group>
-
-      {/* Middle Microservices Layer */}
-      <group ref={c2Ref}>
-        <Cylinder args={[0.75, 0.75, 0.18, 24]}>
-          <meshStandardMaterial
-            color="#0F172A"
-            emissive="#7C3AED"
-            emissiveIntensity={0.8}
-            metalness={0.9}
-            roughness={0.2}
-          />
-        </Cylinder>
-        <Torus args={[0.77, 0.015, 16, 40]} rotation={[Math.PI / 2, 0, 0]}>
-          <meshBasicMaterial color="#7C3AED" />
-        </Torus>
-      </group>
-
-      {/* Bottom Database Core Layer */}
-      <group ref={c3Ref}>
-        <Cylinder args={[0.85, 0.85, 0.18, 24]}>
-          <meshStandardMaterial
-            color="#0B132B"
-            emissive="#0284C7"
-            emissiveIntensity={0.8}
-            metalness={0.9}
-            roughness={0.2}
-          />
-        </Cylinder>
-        <Torus args={[0.87, 0.015, 16, 40]} rotation={[Math.PI / 2, 0, 0]}>
-          <meshBasicMaterial color="#0284C7" />
-        </Torus>
-      </group>
-    </group>
-  );
-};
-
-// 4. STUDENT PROJECTS & ROBOTICS ANIMATION
-const StudentProjectsSystem = ({ isHovered }) => {
-  const boardRef = useRef();
-  const ledRef = useRef();
-
-  useFrame((state) => {
-    const t = state.clock.getElapsedTime();
-    if (boardRef.current) {
-      boardRef.current.rotation.y = Math.sin(t * 0.8) * 0.3;
-      boardRef.current.rotation.x = 0.25 + Math.cos(t * 0.6) * 0.15;
-    }
-    if (ledRef.current) {
-      ledRef.current.scale.setScalar(1 + Math.sin(t * 6) * 0.3);
-    }
-  });
-
-  return (
-    <group ref={boardRef}>
-      {/* PCB Base Board */}
-      <Box args={[1.5, 1.1, 0.08]} position={[0, 0, 0]}>
-        <meshStandardMaterial color="#0F172A" roughness={0.3} metalness={0.7} />
-      </Box>
-
-      {/* Central Microcontroller IC */}
-      <Box args={[0.45, 0.45, 0.12]} position={[0, 0, 0.06]}>
-        <meshStandardMaterial color="#00B4D8" emissive="#0284C7" emissiveIntensity={0.8} />
-      </Box>
-
-      {/* Header Pins */}
-      <Box args={[1.3, 0.08, 0.12]} position={[0, 0.45, 0.04]}>
-        <meshStandardMaterial color="#7C3AED" metalness={0.9} />
-      </Box>
-      <Box args={[1.3, 0.08, 0.12]} position={[0, -0.45, 0.04]}>
-        <meshStandardMaterial color="#7C3AED" metalness={0.9} />
-      </Box>
-
-      {/* Blinking Indicator LEDs */}
-      <Sphere ref={ledRef} args={[0.04, 12, 12]} position={[0.5, 0.2, 0.08]}>
-        <meshBasicMaterial color="#00B4D8" />
-      </Sphere>
-      <Sphere args={[0.04, 12, 12]} position={[0.5, 0.05, 0.08]}>
-        <meshBasicMaterial color="#7C3AED" />
-      </Sphere>
-    </group>
-  );
-};
-
-export const ServiceCard3D = ({ slug }) => {
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  const videoData = getServiceVideoData(name || slug);
+
+  // Auto-play video on mount
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.muted = isMuted;
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsPlaying(true))
+          .catch(() => {
+            // Autoplay policy or low power mode
+            setIsPlaying(false);
+          });
+      }
+    }
+  }, [slug, name, isMuted]);
+
+  const togglePlay = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video.play().then(() => setIsPlaying(true)).catch(() => {});
+    } else {
+      video.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleMute = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = !video.muted;
+    setIsMuted(video.muted);
+  };
+
+  const toggleFullscreen = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const container = containerRef.current;
+    if (!container) return;
+    if (!document.fullscreenElement) {
+      if (container.requestFullscreen) {
+        container.requestFullscreen().catch(() => {});
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+  };
+
+  // Thumbnail mode (used in service catalog card banners)
+  if (isThumbnail) {
+    return (
+      <div
+        style={{
+          width: '100%',
+          height: '100%',
+          position: 'relative',
+          overflow: 'hidden',
+          backgroundColor: '#0F172A',
+          ...style
+        }}
+        className={className}
+      >
+        {!hasError && videoData ? (
+          <video
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster={poster}
+            onError={() => setHasError(true)}
+            onLoadedData={() => setIsLoaded(true)}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              display: 'block',
+              transition: 'transform 0.4s ease, opacity 0.3s ease',
+              opacity: isLoaded ? 1 : 0.85
+            }}
+          >
+            <source src={videoData.primaryUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src={poster}
+            alt={name || slug}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        )}
+      </div>
+    );
+  }
+
+  // Showcase / Detail mode (replaces the interactive 3D visualizer in ServiceDetail)
   return (
     <div
+      ref={containerRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
         width: '100%',
-        height: '190px',
+        height: '240px',
         position: 'relative',
-        background: 'radial-gradient(circle at 50% 50%, rgba(0, 180, 216, 0.06) 0%, #FFFFFF 85%)',
-        borderRadius: 'var(--radius-md)',
+        background: '#0B132B',
+        borderRadius: 'var(--radius-lg, 16px)',
         overflow: 'hidden',
         border: '1px solid #E2E8F0',
-        transition: 'border-color 0.25s, box-shadow 0.25s'
+        boxShadow: '0 12px 30px -4px rgba(15, 23, 42, 0.18)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        ...style
       }}
+      className={`service-video-container ${className}`}
     >
-      <Suspense fallback={<div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0284C7', fontSize: '0.8rem' }}>Loading 3D Visualizer...</div>}>
-        <Canvas
-          camera={{ position: [0, 0, 3.1], fov: 42 }}
-          dpr={[1, 1.2]}
-          gl={{ antialias: true, alpha: true }}
+      {!hasError && videoData ? (
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted={isMuted}
+          playsInline
+          poster={poster}
+          onError={() => setHasError(true)}
+          onLoadedData={() => setIsLoaded(true)}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            transition: 'transform 0.5s ease',
+            transform: isHovered ? 'scale(1.02)' : 'scale(1)'
+          }}
         >
-          <ambientLight intensity={1.2} />
-          <directionalLight position={[4, 5, 4]} intensity={1.8} color="#ffffff" />
-          <pointLight position={[-3, -3, 2]} intensity={0.9} color="#00B4D8" />
-          <Float speed={2.2} rotationIntensity={0.3} floatIntensity={0.4}>
-            {slug === 'ai-cctv' && <FaceTrackingSystem isHovered={isHovered} />}
-            {slug === 'web-development' && <WebDevSystem isHovered={isHovered} />}
-            {slug === 'software-development' && <SoftwareSystem isHovered={isHovered} />}
-            {slug === 'student-projects' && <StudentProjectsSystem isHovered={isHovered} />}
-            {!['ai-cctv', 'web-development', 'software-development', 'student-projects'].includes(slug) && (
-              <SoftwareSystem isHovered={isHovered} />
-            )}
-          </Float>
-        </Canvas>
-      </Suspense>
+          <source src={videoData.primaryUrl} type="video/mp4" />
+        </video>
+      ) : (
+        <img
+          src={poster}
+          alt={name || slug}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        />
+      )}
+
+      {/* Subtle Bottom Ambient Gradient */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to top, rgba(11, 19, 43, 0.75) 0%, rgba(11, 19, 43, 0.1) 40%, transparent 70%)',
+          pointerEvents: 'none'
+        }}
+      />
+
+      {/* Live Badge Top Right */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          border: '1px solid rgba(0, 180, 216, 0.35)',
+          padding: '4px 10px',
+          borderRadius: '9999px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontSize: '0.68rem',
+          fontFamily: 'var(--font-mono, monospace)',
+          fontWeight: 700,
+          color: '#00B4D8',
+          letterSpacing: '0.04em',
+          zIndex: 2,
+          pointerEvents: 'none'
+        }}
+      >
+        <span
+          style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            background: '#10B981',
+            boxShadow: '0 0 8px #10B981'
+          }}
+        />
+        <span>PRODUCTION VIDEO</span>
+      </div>
+
+      {/* Video Interactive Controls Floating Bar (Appears on Hover or When Paused) */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '12px',
+          left: '12px',
+          right: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          opacity: isHovered || !isPlaying ? 1 : 0.85,
+          transition: 'opacity 0.25s ease',
+          zIndex: 3
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Play / Pause Toggle Button */}
+          <button
+            onClick={togglePlay}
+            style={{
+              background: 'rgba(15, 23, 42, 0.85)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '50%',
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              transition: 'transform 0.15s ease, background 0.15s ease'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            title={isPlaying ? 'Pause Video' : 'Play Video'}
+            aria-label={isPlaying ? 'Pause Video' : 'Play Video'}
+          >
+            {isPlaying ? <Pause size={15} /> : <Play size={15} style={{ marginLeft: '2px' }} />}
+          </button>
+
+          {/* Mute / Unmute Toggle Button */}
+          <button
+            onClick={toggleMute}
+            style={{
+              background: 'rgba(15, 23, 42, 0.85)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '50%',
+              width: '34px',
+              height: '34px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              transition: 'transform 0.15s ease, background 0.15s ease'
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+            title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
+            aria-label={isMuted ? 'Unmute Audio' : 'Mute Audio'}
+          >
+            {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} color="#00B4D8" />}
+          </button>
+        </div>
+
+        {/* Fullscreen Button */}
+        <button
+          onClick={toggleFullscreen}
+          style={{
+            background: 'rgba(15, 23, 42, 0.85)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '50%',
+            width: '34px',
+            height: '34px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#FFFFFF',
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+            transition: 'transform 0.15s ease'
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+          onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+          title="Fullscreen View"
+          aria-label="Fullscreen View"
+        >
+          <Maximize2 size={15} />
+        </button>
+      </div>
     </div>
   );
 };
+
+export const ServiceVideo = ServiceCard3D;

@@ -108,16 +108,25 @@ export const ServiceDetail = () => {
               </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: '32px', textAlign: 'center', background: '#FFFFFF' }}>
-              <ServiceCard3D slug={service.slug} />
+            <div className="glass-panel" style={{ padding: '24px', textAlign: 'center', background: '#FFFFFF' }}>
+              <ServiceCard3D
+                slug={service.slug}
+                name={service.name}
+                poster={service.image}
+              />
               <div style={{
-                marginTop: '16px',
+                marginTop: '14px',
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.8rem',
+                fontSize: '0.78rem',
                 color: '#0284C7',
-                fontWeight: 700
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
               }}>
-                [ INTERACTIVE VISUALIZER ACTIVE ]
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', display: 'inline-block', boxShadow: '0 0 8px #10B981' }} />
+                <span>OFFICIAL PRODUCTION SYSTEM PREVIEW</span>
               </div>
             </div>
           </div>

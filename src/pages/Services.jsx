@@ -171,17 +171,14 @@ export const Services = () => {
 
               return (
                 <div key={svc.slug || svc.id} className="glass-panel tilt-card service-card-container" style={{ padding: 0, display: 'flex', flexDirection: 'column', background: '#FFFFFF', overflow: 'hidden', borderRadius: 'var(--radius-lg)', border: '1px solid #E2E8F0', height: '100%' }}>
-                  <div className="service-card-banner" style={{ height: '180px' }}>
-                    <img
-                      src={cardImage}
-                      alt={svc.name}
-                      loading="lazy"
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = getAssetUrl('/images/card-software.jpg');
-                      }}
+                  <div className="service-card-banner" style={{ height: '180px', position: 'relative', overflow: 'hidden' }}>
+                    <ServiceCard3D
+                      slug={svc.slug}
+                      name={svc.name}
+                      poster={cardImage}
+                      isThumbnail={true}
                     />
-                    <div className="service-card-overlay" />
+                    <div className="service-card-overlay" style={{ pointerEvents: 'none' }} />
                     <div style={{
                       position: 'absolute',
                       bottom: '12px',
@@ -189,7 +186,9 @@ export const Services = () => {
                       right: '16px',
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      zIndex: 3,
+                      pointerEvents: 'none'
                     }}>
                       <span className="badge badge-purple" style={{ margin: 0, background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)', color: '#FFFFFF', border: '1px solid rgba(255,255,255,0.2)' }}>
                         {svc.category}
