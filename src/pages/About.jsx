@@ -178,72 +178,27 @@ const AboutSectionVideoCard = ({ videoFile, badge, stages = [], poster }) => {
 };
 
 export const About = () => {
-  const heroVideoUrl = getAssetUrl(`/videos/${encodeURI('COGNISYS AI.mp4')}`);
-
   return (
     <div style={{ paddingTop: '72px' }}>
-      {/* 1. INTRO HERO SECTION WITH COGNISYS AI.MP4 VIDEO BACKGROUND */}
-      <section 
-        className="about-hero-video-section"
-        style={{
-          minHeight: '440px',
-          display: 'flex',
-          alignItems: 'center',
-          position: 'relative',
-          borderBottom: '1px solid #1E293B',
-          textAlign: 'center'
-        }}
-      >
-        {/* Background Video */}
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              minWidth: '100%',
-              minHeight: '100%',
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              filter: 'brightness(0.55) contrast(1.1)'
-            }}
-          >
-            <source src={heroVideoUrl} type="video/mp4" />
-          </video>
-          {/* Dark Overlay Gradient */}
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(135deg, rgba(11, 19, 43, 0.92) 0%, rgba(15, 23, 42, 0.78) 50%, rgba(11, 19, 43, 0.94) 100%)'
-          }} />
-          <div className="service-hero-overlay-scanline" />
-        </div>
-
-        <div className="container-custom" style={{ position: 'relative', zIndex: 2 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-            <div className="badge badge-cyan" style={{ margin: 0 }}>
-              <Sparkles size={13} color="#00B4D8" />
-              <span>COGNISYS ECOSYSTEM</span>
-            </div>
-            <div className="about-video-filename-tag">
-              <span className="live-indicator-dot" />
-              <span>FILE: COGNISYS AI.mp4</span>
-            </div>
+      {/* 1. INTRO HERO SECTION */}
+      <section style={{ 
+        padding: '50px 0 28px', 
+        textAlign: 'center', 
+        background: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.08) 0%, transparent 65%)' 
+      }}>
+        <div className="container-custom">
+          <div className="badge badge-cyan" style={{ marginBottom: '14px' }}>
+            <Sparkles size={13} color="#00B4D8" />
+            <span>INTERACTIVE ECOSYSTEM</span>
           </div>
 
-          <h1 style={{ fontSize: 'clamp(2.4rem, 5vw, 4.2rem)', marginBottom: '16px', fontWeight: 900, color: '#FFFFFF', textShadow: '0 4px 20px rgba(0,0,0,0.6)' }}>
+          <h1 style={{ fontSize: 'clamp(2.4rem, 4.5vw, 3.8rem)', color: '#0B132B', marginBottom: '16px', fontWeight: 900, lineHeight: 1.15 }}>
             COGNISYS<br />
             <span className="text-gradient">INTELLIGENCE IN MOTION</span>
           </h1>
 
-          <p style={{ fontSize: '1.15rem', color: '#E2E8F0', maxWidth: '720px', margin: '0 auto 28px', lineHeight: 1.7, fontWeight: 500, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
-            "Explore what we build." Journey through our computer vision surveillance systems, modern web platforms, distributed cloud microservices, and student engineering innovation lab.
+          <p style={{ fontSize: '1.1rem', color: '#1E293B', maxWidth: '720px', margin: '0 auto 24px', lineHeight: 1.7, fontWeight: 500 }}>
+            "Scroll to explore what we build." Journey through our computer vision surveillance systems, modern web platforms, distributed cloud microservices, and student engineering innovation lab.
           </p>
         </div>
       </section>
