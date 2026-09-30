@@ -1,0 +1,15 @@
+# Environment & Secrets
+.env
+.env.*
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Database
+*.db
+*.sqlite3
+
+# Uploads & Temp
+app/uploads/*
+!app/uploads/.gitkeep

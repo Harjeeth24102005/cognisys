@@ -106,13 +106,13 @@ export function getServiceVideoData(identifier) {
   const item = SERVICE_VIDEOS[key];
   if (item) {
     return {
-      primaryUrl: getAssetUrl(`/videos/${encodeURIComponent(item.filename)}`),
+      primaryUrl: getAssetUrl(`/videos/${encodeURI(item.filename)}`),
       name: item.name
     };
   }
   // Generic fallback if not matched directly
   return {
-    primaryUrl: getAssetUrl(`/videos/${encodeURIComponent(key)}.mp4`),
+    primaryUrl: getAssetUrl(`/videos/${encodeURI(key)}.mp4`),
     name: key
   };
 }
