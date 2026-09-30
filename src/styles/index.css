@@ -1835,4 +1835,64 @@ button:active,
   }
 }
 
+/* ========================================================
+   ABOUT PAGE VIDEO BACKGROUNDS & STORY EXPERIENCE
+   ======================================================== */
+.about-hero-video-section {
+  position: relative;
+  overflow: hidden;
+  padding: 60px 0 40px;
+  background-color: #0B132B;
+  color: #FFFFFF;
+}
+
+.about-experience-viewport {
+  min-height: 580px;
+  height: 72vh;
+  width: 100%;
+  position: relative;
+  background: #0B132B;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+@media (max-width: 768px) {
+  .about-experience-viewport {
+    height: 80vh;
+    min-height: 520px;
+  }
+}
+
+.about-section-video-card {
+  position: relative;
+  border-radius: var(--radius-lg, 18px);
+  overflow: hidden;
+  background: #0B132B;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-section-video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px -8px rgba(0, 180, 216, 0.22);
+}
+
+.about-video-filename-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 180, 216, 0.35);
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #00B4D8;
+  letter-spacing: 0.03em;
+}
+
 

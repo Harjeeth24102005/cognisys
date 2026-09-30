@@ -63,4 +63,4 @@ Thumbs.db
 
 # Root media files (actual assets are in public/ and docs/)
 /*.mp4
-videos/
+/videos/

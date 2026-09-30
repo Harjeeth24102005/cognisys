@@ -1,32 +1,257 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Eye, Globe, Code, GraduationCap, ShieldCheck, Cpu, 
-  ArrowRight, CheckCircle2, Zap, Layers, Server, Terminal, Lock 
+  ArrowRight, CheckCircle2, Zap, Layers, Server, Terminal, Lock,
+  Play, Pause, Volume2, VolumeX, Maximize2, Sparkles, Activity
 } from 'lucide-react';
 import { AboutStoryExperience } from '../components3d/AboutStoryExperience';
+import { getAssetUrl } from '../utils/assets';
+
+// Reusable Video Player Card for About Sections
+const AboutSectionVideoCard = ({ videoFile, badge, stages = [], poster }) => {
+  const videoRef = useRef(null);
+  const containerRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const videoUrl = getAssetUrl(`/videos/${encodeURI(videoFile)}`);
+
+  const togglePlay = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const v = videoRef.current;
+    if (!v) return;
+    if (v.paused) {
+      v.play().then(() => setIsPlaying(true)).catch(() => {});
+    } else {
+      v.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleMute = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !v.muted;
+    setIsMuted(v.muted);
+  };
+
+  const toggleFullscreen = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const elem = containerRef.current;
+    if (!elem) return;
+    if (!document.fullscreenElement) {
+      elem.requestFullscreen?.().catch(() => {});
+    } else {
+      document.exitFullscreen?.().catch(() => {});
+    }
+  };
+
+  return (
+    <div 
+      ref={containerRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="about-section-video-card"
+      style={{
+        position: 'relative',
+        borderRadius: '20px',
+        overflow: 'hidden',
+        background: '#0B132B',
+        border: '1px solid #CBD5E1',
+        boxShadow: '0 16px 40px -10px rgba(15, 23, 42, 0.16)',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      {/* Video Viewport */}
+      <div style={{ position: 'relative', height: '280px', overflow: 'hidden', background: '#07191E' }}>
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted={isMuted}
+          playsInline
+          poster={poster}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+            transition: 'transform 0.5s ease',
+            transform: isHovered ? 'scale(1.03)' : 'scale(1)'
+          }}
+        >
+          <source src={videoUrl} type="video/mp4" />
+        </video>
+
+        {/* Ambient Dark Overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to top, rgba(11, 19, 43, 0.92) 0%, rgba(11, 19, 43, 0.2) 50%, rgba(11, 19, 43, 0.6) 100%)',
+          pointerEvents: 'none'
+        }} />
+
+        {/* File Name Pill Badge (Top Left) */}
+        <div style={{
+          position: 'absolute',
+          top: '14px',
+          left: '14px',
+          zIndex: 5
+        }}>
+          <div className="about-video-filename-tag">
+            <span className="live-indicator-dot" />
+            <span>FILE: {videoFile}</span>
+          </div>
+        </div>
+
+        {/* Controls Overlay (Bottom of Video Viewport) */}
+        <div style={{
+          position: 'absolute',
+          bottom: '12px',
+          left: '14px',
+          right: '14px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          zIndex: 5
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={togglePlay}
+              className="service-dock-btn"
+              style={{ width: '32px', height: '32px' }}
+              title={isPlaying ? "Pause" : "Play"}
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? <Pause size={14} /> : <Play size={14} style={{ marginLeft: '1px' }} />}
+            </button>
+            <button
+              onClick={toggleMute}
+              className={`service-dock-btn ${!isMuted ? 'active' : ''}`}
+              style={{ width: '32px', height: '32px' }}
+              title={isMuted ? "Unmute Audio" : "Mute Audio"}
+              aria-label={isMuted ? "Unmute Audio" : "Mute Audio"}
+            >
+              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            </button>
+          </div>
+
+          <button
+            onClick={toggleFullscreen}
+            className="service-dock-btn"
+            style={{ width: '32px', height: '32px' }}
+            title="Fullscreen Video View"
+            aria-label="Fullscreen Video View"
+          >
+            <Maximize2 size={14} />
+          </button>
+        </div>
+      </div>
+
+      {/* Card Content & Architecture Specs below the video */}
+      <div style={{ padding: '24px', background: '#FFFFFF', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: '0.78rem', fontFamily: 'var(--font-mono)', color: '#0284C7', marginBottom: '14px', fontWeight: 700, letterSpacing: '0.04em' }}>
+          [ {badge || 'SYSTEM ARCHITECTURE & CAPABILITIES'} ]
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {stages.map((stg, i) => (
+            <div key={i} style={{ background: '#F8FAFC', padding: '10px 14px', borderRadius: '10px', border: '1px solid #E2E8F0', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+              {stg.num && <span style={{ fontFamily: 'var(--font-mono)', color: '#0284C7', fontWeight: 800, fontSize: '0.82rem', marginTop: '2px' }}>{stg.num}</span>}
+              <div>
+                <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0B132B' }}>{stg.title}</div>
+                <div style={{ fontSize: '0.76rem', color: '#475569', marginTop: '2px', fontWeight: 500, lineHeight: 1.4 }}>{stg.desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const About = () => {
+  const heroVideoUrl = getAssetUrl(`/videos/${encodeURI('COGNISYS AI.mp4')}`);
+
   return (
     <div style={{ paddingTop: '72px' }}>
-      {/* 1. INTRO & 3D STORYTELLING EXPERIENCE */}
-      <section style={{ padding: '40px 0 20px', textAlign: 'center' }}>
-        <div className="container-custom">
-          <div className="badge" style={{ marginBottom: '14px' }}>INTERACTIVE ECOSYSTEM</div>
-          <h1 style={{ fontSize: 'clamp(2.2rem, 4.5vw, 3.8rem)', marginBottom: '14px', fontWeight: 900 }}>
+      {/* 1. INTRO HERO SECTION WITH COGNISYS AI.MP4 VIDEO BACKGROUND */}
+      <section 
+        className="about-hero-video-section"
+        style={{
+          minHeight: '440px',
+          display: 'flex',
+          alignItems: 'center',
+          position: 'relative',
+          borderBottom: '1px solid #1E293B',
+          textAlign: 'center'
+        }}
+      >
+        {/* Background Video */}
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              minWidth: '100%',
+              minHeight: '100%',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              filter: 'brightness(0.55) contrast(1.1)'
+            }}
+          >
+            <source src={heroVideoUrl} type="video/mp4" />
+          </video>
+          {/* Dark Overlay Gradient */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(135deg, rgba(11, 19, 43, 0.92) 0%, rgba(15, 23, 42, 0.78) 50%, rgba(11, 19, 43, 0.94) 100%)'
+          }} />
+          <div className="service-hero-overlay-scanline" />
+        </div>
+
+        <div className="container-custom" style={{ position: 'relative', zIndex: 2 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+            <div className="badge badge-cyan" style={{ margin: 0 }}>
+              <Sparkles size={13} color="#00B4D8" />
+              <span>COGNISYS ECOSYSTEM</span>
+            </div>
+            <div className="about-video-filename-tag">
+              <span className="live-indicator-dot" />
+              <span>FILE: COGNISYS AI.mp4</span>
+            </div>
+          </div>
+
+          <h1 style={{ fontSize: 'clamp(2.4rem, 5vw, 4.2rem)', marginBottom: '16px', fontWeight: 900, color: '#FFFFFF', textShadow: '0 4px 20px rgba(0,0,0,0.6)' }}>
             COGNISYS<br />
             <span className="text-gradient">INTELLIGENCE IN MOTION</span>
           </h1>
-          <p style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', maxWidth: '640px', margin: '0 auto 28px' }}>
-            "Scroll to explore what we build." Journey through our computer vision surveillance systems, modern web applications, scalable software architectures, and student innovation lab.
+
+          <p style={{ fontSize: '1.15rem', color: '#E2E8F0', maxWidth: '720px', margin: '0 auto 28px', lineHeight: 1.7, fontWeight: 500, textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
+            "Explore what we build." Journey through our computer vision surveillance systems, modern web platforms, distributed cloud microservices, and student engineering innovation lab.
           </p>
         </div>
       </section>
 
-      {/* 2. THE MASTER 3D STORYTELLING CANVAS COMPONENT */}
+      {/* 2. THE MASTER VIDEO STORYTELLING EXPERIENCE */}
       <AboutStoryExperience />
 
-      {/* 3. DETAILED HTML CONTENT BREAKDOWN SECTIONS */}
+      {/* 3. DETAILED CONTENT BREAKDOWN SECTIONS WITH VIDEO CARDS */}
       
       {/* SECTION 1: AI CCTV MONITORING */}
       <section id="cctv-details" className="section-padding" style={{ borderBottom: '1px solid #E2E8F0', background: '#FFFFFF' }}>
@@ -38,9 +263,9 @@ export const About = () => {
             alignItems: 'center'
           }}>
             <div>
-              <div className="badge badge-cyan" style={{ marginBottom: '14px' }}>COMPUTER VISION & SURVEILLANCE</div>
+              <div className="badge badge-cyan" style={{ marginBottom: '14px' }}>COMPUTER VISION &amp; SURVEILLANCE</div>
               <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: '#0B132B', marginBottom: '18px', fontWeight: 900 }}>
-                AI CCTV Monitoring & Intelligent Surveillance
+                AI CCTV Monitoring &amp; Intelligent Surveillance
               </h2>
               <p style={{ fontSize: '1rem', color: '#1E293B', lineHeight: 1.7, marginBottom: '24px', fontWeight: 500 }}>
                 We convert standard IP camera streams into autonomous intelligence engines. By leveraging optimized TensorRT models and multi-object tracking algorithms, Cognisys detects anomalies and generates actionable real-time alerts.
@@ -69,36 +294,23 @@ export const About = () => {
                 ))}
               </div>
 
-              <Link to="/services/ai-cctv" className="btn-primary">
+              <Link to="/services/ai-cctv-attendance" className="btn-primary" style={{ textDecoration: 'none' }}>
                 <span>Request AI CCTV Solution</span>
                 <ArrowRight size={16} />
               </Link>
             </div>
 
-            {/* Visual Specs Card */}
-            <div className="glass-panel tilt-card" style={{ padding: '32px', position: 'relative', background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
-              <div style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: '#0284C7', marginBottom: '16px', fontWeight: 700 }}>
-                [ SURVEILLANCE PIPELINE ARCHITECTURE ]
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid #CBD5E1' }}>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0B132B' }}>Stage 1: Multi-Stream RTSP Ingestion</div>
-                  <div style={{ fontSize: '0.78rem', color: '#1E293B', marginTop: '2px', fontWeight: 500 }}>GPU-accelerated hardware decoding across up to 32 concurrent channels.</div>
-                </div>
-                <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid #CBD5E1' }}>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0284C7' }}>Stage 2: YOLOv11 & DeepSORT Inference</div>
-                  <div style={{ fontSize: '0.78rem', color: '#1E293B', marginTop: '2px', fontWeight: 500 }}>Sub-50ms bounding box prediction and persistent trajectory association.</div>
-                </div>
-                <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid #CBD5E1' }}>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#7C3AED' }}>Stage 3: ArcFace Biometrics & Verification</div>
-                  <div style={{ fontSize: '0.78rem', color: '#1E293B', marginTop: '2px', fontWeight: 500 }}>Automated staff attendance logging and unauthorized intruder detection.</div>
-                </div>
-                <div style={{ background: '#F8FAFC', padding: '14px', borderRadius: '8px', border: '1px solid #CBD5E1' }}>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#059669' }}>Stage 4: Real-time Cloud Telemetry & Alert Dispatch</div>
-                  <div style={{ fontSize: '0.78rem', color: '#1E293B', marginTop: '2px', fontWeight: 500 }}>Instant multi-channel push alerts, SMS notifications and live dashboard sync.</div>
-                </div>
-              </div>
-            </div>
+            {/* Video Showcase Card */}
+            <AboutSectionVideoCard
+              videoFile="AI-Based CCTV Attendance Monitoring System.mp4"
+              badge="SURVEILLANCE PIPELINE ARCHITECTURE"
+              stages={[
+                { num: "01.", title: "Multi-Stream RTSP Ingestion", desc: "GPU-accelerated hardware decoding across up to 32 concurrent channels." },
+                { num: "02.", title: "YOLOv11 & DeepSORT Inference", desc: "Sub-50ms bounding box prediction and persistent trajectory association." },
+                { num: "03.", title: "ArcFace Biometrics & Verification", desc: "Automated staff attendance logging and unauthorized intruder detection." },
+                { num: "04.", title: "Real-time Telemetry & Alert Dispatch", desc: "Instant multi-channel push alerts, SMS notifications and live dashboard sync." }
+              ]}
+            />
           </div>
         </div>
       </section>
@@ -112,49 +324,25 @@ export const About = () => {
             gap: '48px',
             alignItems: 'center'
           }}>
-            <div className="glass-panel tilt-card" style={{ padding: '32px', background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
-              <div style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: '#0284C7', marginBottom: '16px', fontWeight: 700 }}>
-                [ DIGITAL PRODUCT LIFECYCLE ]
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: '#0284C7', fontWeight: 800 }}>01.</span>
-                  <div>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0B132B' }}>Idea & User Experience Wireframing</div>
-                    <div style={{ fontSize: '0.75rem', color: '#1E293B', fontWeight: 500 }}>Figma prototypes, interaction design & user flows.</div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: '#0284C7', fontWeight: 800 }}>02.</span>
-                  <div>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0B132B' }}>Interactive High-Performance Modern Frontend</div>
-                    <div style={{ fontSize: '0.75rem', color: '#1E293B', fontWeight: 500 }}>React, modern components, smooth animations, optimized bundle.</div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: '#0284C7', fontWeight: 800 }}>03.</span>
-                  <div>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0B132B' }}>Python REST API & Database Architecture</div>
-                    <div style={{ fontSize: '0.75rem', color: '#1E293B', fontWeight: 500 }}>FastAPI, SQLAlchemy, PostgreSQL, Redis caching.</div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', color: '#0284C7', fontWeight: 800 }}>04.</span>
-                  <div>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0B132B' }}>Cloud Deployment & Live Production</div>
-                    <div style={{ fontSize: '0.75rem', color: '#1E293B', fontWeight: 500 }}>Docker, CI/CD automated test pipelines, SSL security.</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Video Showcase Card on Left */}
+            <AboutSectionVideoCard
+              videoFile="Websites & Modern Web Development.mp4"
+              badge="DIGITAL PRODUCT LIFECYCLE"
+              stages={[
+                { num: "01.", title: "Idea & UX Wireframing", desc: "Figma prototypes, interaction design & responsive user flows." },
+                { num: "02.", title: "High-Performance Modern Frontend", desc: "React, modern component architecture, smooth micro-interactions." },
+                { num: "03.", title: "Python REST API & Database", desc: "FastAPI, SQLAlchemy, PostgreSQL, and Redis caching layers." },
+                { num: "04.", title: "Cloud Deployment & Production", desc: "Docker, automated testing pipelines, and SSL edge security." }
+              ]}
+            />
 
             <div>
-              <div className="badge badge-purple" style={{ marginBottom: '14px' }}>WEB & PLATFORM ENGINEERING</div>
+              <div className="badge badge-purple" style={{ marginBottom: '14px' }}>WEB &amp; PLATFORM ENGINEERING</div>
               <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: '#0B132B', marginBottom: '18px', fontWeight: 900 }}>
-                Web & Software Development
+                Web &amp; Software Development
               </h2>
               <p style={{ fontSize: '1rem', color: '#1E293B', lineHeight: 1.7, marginBottom: '24px', fontWeight: 500 }}>
-                "We build modern digital products designed around your requirements." From sleek responsive web platforms to mission-critical SaaS platforms, we combine aesthetics with high computational performance.
+                "We build modern digital products designed around your requirements." From sleek responsive web platforms to mission-critical SaaS portals, we combine aesthetics with high computational performance.
               </p>
 
               <div className="about-checklist-grid" style={{
@@ -176,7 +364,7 @@ export const About = () => {
                 ))}
               </div>
 
-              <Link to="/services/web-development" className="btn-primary">
+              <Link to="/services/websites" className="btn-primary" style={{ textDecoration: 'none' }}>
                 <span>Start Your Website</span>
                 <ArrowRight size={16} />
               </Link>
@@ -185,8 +373,8 @@ export const About = () => {
         </div>
       </section>
 
-      {/* SECTION 3: STUDENT INNOVATION LAB */}
-      <section id="student-details" className="section-padding" style={{ borderBottom: '1px solid #E2E8F0', background: '#FFFFFF' }}>
+      {/* SECTION 3: CUSTOM SOFTWARE SYSTEMS & CLOUD ARCHITECTURE */}
+      <section id="software-details" className="section-padding" style={{ borderBottom: '1px solid #E2E8F0', background: '#FFFFFF' }}>
         <div className="container-custom">
           <div style={{
             display: 'grid',
@@ -195,12 +383,86 @@ export const About = () => {
             alignItems: 'center'
           }}>
             <div>
-              <div className="badge badge-emerald" style={{ marginBottom: '14px' }}>ACADEMIC & RESEARCH LAB</div>
+              <div className="badge badge-cyan" style={{ marginBottom: '14px' }}>ENTERPRISE &amp; CLOUD SYSTEMS</div>
               <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: '#0B132B', marginBottom: '18px', fontWeight: 900 }}>
-                Student Projects & Capstones
+                Custom Software Systems &amp; Cloud Architecture
               </h2>
               <p style={{ fontSize: '1rem', color: '#1E293B', lineHeight: 1.7, marginBottom: '24px', fontWeight: 500 }}>
-                "Turn your idea into a working project." Cognisys empowers engineering and computer science students with full source code, IEEE-format reports, architecture diagrams, and comprehensive demonstration guidance.
+                Mission-critical enterprise software engineered for uptime, horizontal scalability, and distributed throughput. We build modular microservices, asynchronous message queues, and automated cloud deployments.
+              </p>
+
+              <h4 style={{ fontSize: '0.95rem', color: '#0284C7', fontFamily: 'var(--font-mono)', marginBottom: '14px', fontWeight: 700 }}>
+                SYSTEM HIGHLIGHTS:
+              </h4>
+
+              <div className="about-checklist-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '12px',
+                marginBottom: '32px'
+              }}>
+                {[
+                  "Microservices architecture", "Async background queues",
+                  "FastAPI & Django APIs", "High-concurrency PostgreSQL",
+                  "Docker orchestration", "Automated CI/CD pipelines",
+                  "Real-time WebSocket sync", "24/7 Resilient monitoring"
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', color: '#0F172A', fontWeight: 600 }}>
+                    <CheckCircle2 size={16} color="#00B4D8" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Link to="/services/python-projects" className="btn-primary" style={{ textDecoration: 'none' }}>
+                <span>Explore Custom Software</span>
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            {/* Video Showcase Card */}
+            <AboutSectionVideoCard
+              videoFile="CUSTOM SOFTWARE SYSTEMS & CLOUD ARCHITECTURE.mp4"
+              badge="DISTRIBUTED MICROSERVICES ARCHITECTURE"
+              stages={[
+                { num: "01.", title: "Microservices & API Gateway", desc: "Decoupled high-availability services with zero-downtime routing." },
+                { num: "02.", title: "Asynchronous Event Queues", desc: "Redis & Celery background tasks processing high-throughput events." },
+                { num: "03.", title: "Containerized Orchestration", desc: "Docker Compose and automated scaling with live telemetry." },
+                { num: "04.", title: "99.9% Production SLA", desc: "Continuous monitoring, automated backups & disaster recovery." }
+              ]}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 4: STUDENT INNOVATION LAB */}
+      <section id="student-details" className="section-padding" style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+        <div className="container-custom">
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+            gap: '48px',
+            alignItems: 'center'
+          }}>
+            {/* Video Showcase Card on Left */}
+            <AboutSectionVideoCard
+              videoFile="Final Year Projects.mp4"
+              badge="6-STAGE STUDENT INCUBATION PIPELINE"
+              stages={[
+                { num: "01.", title: "IDEA SCOPING", desc: "Refine concept into an IEEE-standard problem statement." },
+                { num: "02.", title: "PROJECT PLAN", desc: "Select optimal tech stack, datasets and system hardware." },
+                { num: "03.", title: "DEVELOPMENT", desc: "Write clean, modular code with detailed documentation." },
+                { num: "04.", title: "LIVE DEMO & VIVA", desc: "Conduct 1-on-1 walkthrough and technical viva preparation." }
+              ]}
+            />
+
+            <div>
+              <div className="badge badge-emerald" style={{ marginBottom: '14px' }}>ACADEMIC &amp; RESEARCH LAB</div>
+              <h2 style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: '#0B132B', marginBottom: '18px', fontWeight: 900 }}>
+                Student Projects &amp; Capstones
+              </h2>
+              <p style={{ fontSize: '1rem', color: '#1E293B', lineHeight: 1.7, marginBottom: '24px', fontWeight: 500 }}>
+                "Turn your idea into a working project." Cognisys empowers engineering and computer science students with full verified source code, IEEE-format reports, architecture diagrams, and comprehensive demonstration guidance.
               </p>
 
               <div className="about-checklist-grid" style={{
@@ -222,34 +484,10 @@ export const About = () => {
                 ))}
               </div>
 
-              <Link to="/services/student-projects" className="btn-primary">
+              <Link to="/services/final-year-projects" className="btn-primary" style={{ textDecoration: 'none' }}>
                 <span>Discuss Your Project</span>
                 <ArrowRight size={16} />
               </Link>
-            </div>
-
-            <div className="glass-panel tilt-card" style={{ padding: '32px', background: '#FFFFFF', border: '1px solid #E2E8F0' }}>
-              <div style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: '#059669', marginBottom: '16px', fontWeight: 700 }}>
-                [ 6-STAGE STUDENT INCUBATION PIPELINE ]
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {[
-                  { step: "01", title: "IDEA SCOPING", desc: "Refine concept into an IEEE-standard problem statement." },
-                  { step: "02", title: "PROJECT PLAN", desc: "Select optimal tech stack, datasets and system hardware." },
-                  { step: "03", title: "DEVELOPMENT", desc: "Write clean, modular code with detailed documentation." },
-                  { step: "04", title: "TESTING & METRICS", desc: "Verify accuracy, run benchmarks and latency profiling." },
-                  { step: "05", title: "IEEE DOCUMENTATION", desc: "Generate report synopsis, block diagrams and presentation." },
-                  { step: "06", title: "LIVE DEMO & VIVA", desc: "Conduct 1-on-1 walkthrough and viva question preparation." }
-                ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 14px', background: '#F8FAFC', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
-                    <span style={{ fontFamily: 'var(--font-mono)', color: '#059669', fontWeight: 800, fontSize: '0.85rem' }}>{item.step}</span>
-                    <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0B132B' }}>{item.title}</div>
-                      <div style={{ fontSize: '0.74rem', color: '#1E293B', fontWeight: 500 }}>{item.desc}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -298,7 +536,7 @@ export const About = () => {
         </div>
       </section>
 
-      {/* SECTION 4: WHY COGNISYS SUMMARY & FINAL CTA */}
+      {/* SECTION 5: WHY COGNISYS SUMMARY & FINAL CTA */}
       <section className="section-padding" style={{ background: '#F8FAFC', borderTop: '1px solid #E2E8F0' }}>
         <div className="container-custom" style={{ textAlign: 'center' }}>
           <div className="badge badge-cyan" style={{ marginBottom: '14px' }}>THE COGNISYS PROMISE</div>
@@ -331,7 +569,7 @@ export const About = () => {
             ))}
           </div>
 
-          <Link to="/order" className="btn-primary" style={{ padding: '14px 32px', fontSize: '1rem' }}>
+          <Link to="/order" className="btn-primary" style={{ padding: '14px 32px', fontSize: '1rem', textDecoration: 'none' }}>
             <span>Start Your Project With Cognisys</span>
             <ArrowRight size={16} />
           </Link>
