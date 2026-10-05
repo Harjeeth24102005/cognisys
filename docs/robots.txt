@@ -1,0 +1,11 @@
+# robots.txt for https://cognisys.org.in
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+
+# Host
+Host: https://cognisys.org.in
+
+# Sitemaps
+Sitemap: https://cognisys.org.in/sitemap.xml
