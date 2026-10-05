@@ -93,6 +93,7 @@ async function dispatchViaFormspree(payload) {
         name: clientName,
         email: clientEmail,
         _replyto: clientEmail,
+        _subject: fullSubject,
         subject: fullSubject,
         ...cleanPayload
       })
