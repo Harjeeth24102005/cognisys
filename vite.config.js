@@ -48,7 +48,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [react(), resendKeyManagerPlugin()],
-    base: '/cognisys/',
+    base: '/',
     server: {
       port: 5173,
       host: true,

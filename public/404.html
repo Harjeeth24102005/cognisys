@@ -17,7 +17,8 @@
           location.replace(repo);
         }
       } else {
-        location.replace('./');
+        var subpath = path.startsWith('/') ? path.slice(1) : path;
+        location.replace('/#' + (subpath ? '/' + subpath : ''));
       }
     </script>
   </head>
