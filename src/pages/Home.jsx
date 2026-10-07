@@ -11,6 +11,7 @@ import { CORE_SERVICES } from '../data/servicesData';
 import introVideo from '../assets/intro-video.mp4';
 import { getAssetUrl } from '../utils/assets';
 import { ServiceCard3D } from '../components3d/ServiceCard3D';
+import { SEO } from '../components/SEO';
 
 export const Home = () => {
   const [services, setServices] = useState(CORE_SERVICES);
@@ -38,7 +39,7 @@ export const Home = () => {
     api.getServices()
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          // Strictly preserve the 6 core services and their order
+          // Strictly preserve core services and their order
           const merged = CORE_SERVICES.map(core => {
             const remote = data.find(d => d.slug === core.slug);
             if (!remote) return core;
@@ -72,17 +73,18 @@ export const Home = () => {
 
   // Only real, active navigable services & pages available across the Cognisys platform
   const heroCategoryPills = [
-    { label: "AI-Based CCTV Attendance", icon: Eye, path: "/services/ai-cctv-attendance" },
-    { label: "Websites & Web Dev", icon: Globe, path: "/services/websites" },
-    { label: "AI-Based Projects", icon: Cpu, path: "/services/ai-projects" },
+    { label: "AI CCTV Surveillance", icon: Eye, path: "/services/ai-cctv-surveillance" },
+    { label: "Face Recognition", icon: UserCheck, path: "/services/face-recognition" },
+    { label: "AI Integration & ML", icon: Cpu, path: "/services/ai-integration" },
+    { label: "Computer Vision", icon: Eye, path: "/services/computer-vision" },
+    { label: "Web Design & Web Dev", icon: Globe, path: "/services/web-development" },
     { label: "Python Projects", icon: Terminal, path: "/services/python-projects" },
+    { label: "Custom Software", icon: Code, path: "/services/custom-software" },
     { label: "Final Year Projects", icon: GraduationCap, path: "/services/final-year-projects" },
-    { label: "Face Recognition System", icon: UserCheck, path: "/services/face-recognition" },
-    { label: "MSME Registered Entity", icon: ShieldCheck, path: "/about" },
+    { label: "Engineering Projects", icon: FolderGit2, path: "/projects" },
     { label: "Configure Order", icon: ShoppingCart, path: "/order" },
     { label: "About Cognisys", icon: Users, path: "/about" },
     { label: "FAQ & Support", icon: HelpCircle, path: "/faq" },
-    { label: "Engineering Blog", icon: BookOpen, path: "/blog" },
     { label: "Contact Us", icon: Phone, path: "/contact" }
   ];
 
@@ -113,8 +115,61 @@ export const Home = () => {
     }
   ];
 
+  const homeOrganizationSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': 'https://cognisys.org.in/#organization',
+    'name': 'Cognisys Technologies',
+    'alternateName': 'Cognisys AI',
+    'url': 'https://cognisys.org.in',
+    'logo': 'https://cognisys.org.in/cognisys-logo-full.png',
+    'description': 'Cognisys engineers autonomous AI CCTV surveillance, face recognition attendance systems, modern web platforms, custom enterprise software, and university engineering innovations in India.',
+    'email': 'contact.cognisys@gmail.com',
+    'telephone': '+918248349844',
+    'address': {
+      '@type': 'PostalAddress',
+      'addressCountry': 'IN'
+    },
+    'contactPoint': {
+      '@type': 'ContactPoint',
+      'telephone': '+918248349844',
+      'contactType': 'technical support',
+      'email': 'contact.cognisys@gmail.com',
+      'availableLanguage': ['English', 'Tamil']
+    },
+    'sameAs': [
+      'https://github.com/Harjeeth24102005/cognisys'
+    ]
+  };
+
+  const homeWebSiteSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': 'https://cognisys.org.in/#website',
+    'url': 'https://cognisys.org.in',
+    'name': 'Cognisys AI',
+    'alternateName': 'Cognisys',
+    'description': 'AI Solutions • Software Development • CCTV Surveillance • Computer Vision • Web Development • Student & Final Year Projects',
+    'publisher': {
+      '@id': 'https://cognisys.org.in/#organization'
+    }
+  };
+
   return (
     <div style={{ paddingTop: '0' }}>
+      <SEO
+        title="Cognisys AI | AI, Software, CCTV Surveillance & Project Development"
+        description="Cognisys AI engineers autonomous AI CCTV surveillance, face recognition attendance systems, modern web platforms, custom software, Python solutions, and university final year projects in India."
+        keywords="Cognisys, Cognisys AI, Cognisys projects, AI CCTV surveillance, AI CCTV monitoring, face recognition attendance system, computer vision company, web development company, Python projects, final year projects India"
+        canonical="https://cognisys.org.in/"
+        schema={[homeOrganizationSchema, homeWebSiteSchema]}
+      />
+
+      {/* Semantic Top Heading for Search Engines */}
+      <h1 className="sr-only" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+        Cognisys AI — AI Solutions, Software Development, CCTV Surveillance, Computer Vision, Web Development &amp; Student Projects
+      </h1>
+
       {/* 1. HERO SECTION - Full Screen Video Background with Search & Looping Navigation Buttons */}
       <section className="hero-section">
         {/* Background Intro Video - 100% Full Screen Clarity, Completely Unobscured */}

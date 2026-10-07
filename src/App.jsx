@@ -13,11 +13,13 @@ import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Services } from './pages/Services';
 import { ServiceDetail } from './pages/ServiceDetail';
+import { Projects } from './pages/Projects';
 import { Contact } from './pages/Contact';
 import { FAQ } from './pages/FAQ';
 import { Blog, BlogPost } from './pages/Blog';
 import { OrderWizard } from './pages/OrderWizard';
 import { Legal } from './pages/Legal';
+import { NotFound } from './pages/NotFound';
 
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -86,8 +88,8 @@ export function App() {
                 <Route path="/about" element={<About />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/services/:slug" element={<ServiceDetail />} />
-                <Route path="/projects" element={<Navigate to="/services" replace />} />
-                <Route path="/projects/*" element={<Navigate to="/services" replace />} />
+                <Route path="/projects" element={<Projects />} />
+                <Route path="/projects/*" element={<Projects />} />
                 <Route path="/msme" element={<Navigate to="/about" replace />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/faq" element={<FAQ />} />
@@ -101,7 +103,7 @@ export function App() {
                 <Route path="/privacy-policy" element={<Legal />} />
                 <Route path="/terms" element={<Legal />} />
                 <Route path="/refund-policy" element={<Legal />} />
-                <Route path="*" element={<Home />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </ErrorBoundary>
           </main>

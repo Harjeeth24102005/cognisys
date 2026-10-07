@@ -59,17 +59,20 @@ export const Navbar = () => {
 
 
   const servicesList = [
-    { title: "AI-Based CCTV Attendance", path: "/services/ai-cctv-attendance", icon: Eye, desc: "Autonomous facial recognition & surveillance", color: "#00B4D8" },
-    { title: "Websites & Modern Web Dev", path: "/services/websites", icon: Globe, desc: "High-performance responsive web platforms", color: "#0284C7" },
-    { title: "AI-Based Projects", path: "/services/ai-projects", icon: Cpu, desc: "Deep learning, NLP & predictive neural pipelines", color: "#7C3AED" },
-    { title: "Python-Based Projects", path: "/services/python-projects", icon: Terminal, desc: "FastAPI/Django APIs, scrapers & automation", color: "#0891B2" },
-    { title: "Final Year Projects", path: "/services/final-year-projects", icon: GraduationCap, desc: "Verified code, IEEE papers & viva guidance", color: "#F59E0B" },
-    { title: "Face Recognition System", path: "/services/face-recognition", icon: Shield, desc: "Enterprise biometric verification & anti-spoofing", color: "#10B981" }
+    { title: "AI CCTV Surveillance", path: "/services/ai-cctv-surveillance", icon: Eye, desc: "Autonomous facial recognition & surveillance", color: "#00B4D8" },
+    { title: "Face Recognition System", path: "/services/face-recognition", icon: Shield, desc: "Enterprise biometric verification & anti-spoofing", color: "#10B981" },
+    { title: "AI Integration & Solutions", path: "/services/ai-integration", icon: Cpu, desc: "Custom AI, LLM workflows & model serving", color: "#7C3AED" },
+    { title: "Computer Vision Solutions", path: "/services/computer-vision", icon: Eye, desc: "Edge video analytics, tracking & inspection", color: "#0891B2" },
+    { title: "Web Design & Web Dev", path: "/services/web-development", icon: Globe, desc: "High-performance responsive web platforms", color: "#0284C7" },
+    { title: "Python Projects & APIs", path: "/services/python-projects", icon: Terminal, desc: "FastAPI/Django APIs, scrapers & automation", color: "#0891B2" },
+    { title: "Custom Software Systems", path: "/services/custom-software", icon: Code, desc: "Scalable microservices & cloud systems", color: "#0284C7" },
+    { title: "Final Year Capstones", path: "/services/final-year-projects", icon: GraduationCap, desc: "Verified code, IEEE papers & viva guidance", color: "#F59E0B" }
   ];
 
   const navLinks = [
     { title: "Home", path: "/" },
     { title: "About", path: "/about" },
+    { title: "Projects", path: "/projects" },
     { title: "FAQ", path: "/faq" },
     { title: "Contact", path: "/contact" }
   ];
@@ -283,6 +286,23 @@ export const Navbar = () => {
 
 
 
+
+          <Link
+            to="/projects"
+            style={{
+              color: location.pathname === '/projects' ? '#0284C7' : '#0F172A',
+              textDecoration: 'none',
+              fontSize: '0.92rem',
+              fontWeight: location.pathname === '/projects' ? 700 : 600,
+              padding: '7px 15px',
+              borderRadius: '20px',
+              background: location.pathname === '/projects' ? 'rgba(0, 180, 216, 0.08)' : 'transparent',
+              border: location.pathname === '/projects' ? '1px solid rgba(0, 180, 216, 0.25)' : '1px solid transparent',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            Projects
+          </Link>
 
           <Link
             to="/faq"

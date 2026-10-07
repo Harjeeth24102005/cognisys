@@ -96,33 +96,38 @@ export const Footer = () => {
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <li>
-                <Link to="/services/ai-cctv-attendance" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
-                  <span>AI-Based CCTV Attendance Monitoring</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/websites" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
-                  <span>Websites &amp; Modern Web Development</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/ai-projects" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
-                  <span>AI-Based Projects</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/python-projects" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
-                  <span>Python-Based Projects</span>
-                </Link>
-              </li>
-              <li>
-                <Link to="/services/final-year-projects" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
-                  <span>Final Year Projects</span>
+                <Link to="/services/ai-cctv-surveillance" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
+                  <span>AI CCTV Surveillance &amp; Attendance</span>
                 </Link>
               </li>
               <li>
                 <Link to="/services/face-recognition" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
-                  <span>Face Recognition System</span>
+                  <span>Face Recognition Systems</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/services/ai-integration" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
+                  <span>AI Integration &amp; Enterprise Solutions</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/services/computer-vision" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
+                  <span>Computer Vision &amp; Video Analytics</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/services/web-development" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
+                  <span>Web Design &amp; Web Development</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/services/python-projects" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
+                  <span>Python Projects &amp; Automation</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/services/final-year-projects" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
+                  <span>Final Year Projects &amp; Capstones</span>
                 </Link>
               </li>
               <li style={{ paddingTop: '6px' }}>
@@ -158,6 +163,12 @@ export const Footer = () => {
               <li>
                 <Link to="/about" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
                   <span>About Cognisys</span>
+                </Link>
+              </li>
+
+              <li>
+                <Link to="/projects" className="footer-link" style={{ color: '#E2E8F0', fontSize: '1.02rem' }}>
+                  <span>Projects &amp; Case Studies</span>
                 </Link>
               </li>
 

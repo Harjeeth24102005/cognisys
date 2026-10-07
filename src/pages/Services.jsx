@@ -9,6 +9,7 @@ import { ServiceCard3D } from '../components3d/ServiceCard3D';
 import { api } from '../services/api';
 import { CORE_SERVICES } from '../data/servicesData';
 import { getAssetUrl } from '../utils/assets';
+import { SEO } from '../components/SEO';
 
 export const Services = () => {
   const [services, setServices] = useState(CORE_SERVICES);
@@ -61,11 +62,46 @@ export const Services = () => {
       .catch(err => console.log('Using default services:', err));
   }, []);
 
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'Services', url: '/services' }
+  ];
+
+  const collectionSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    'name': 'Cognisys Engineering Solutions & Service Catalog',
+    'description': 'Production-grade engineering solutions spanning edge computer vision, AI CCTV, modern web applications, scalable enterprise systems, and academic capstones.',
+    'url': 'https://cognisys.org.in/services',
+    'hasPart': services.map(svc => ({
+      '@type': 'Service',
+      'name': svc.name,
+      'description': svc.short_desc,
+      'url': `https://cognisys.org.in/services/${svc.slug}`
+    }))
+  };
+
   return (
     <div style={{ paddingTop: '72px' }}>
+      <SEO
+        title="Cognisys AI Service Catalog | AI, Computer Vision, Web & Software Solutions"
+        description="Explore Cognisys engineering services: AI CCTV surveillance, face recognition attendance, modern web development, custom software, Python, and capstone project development in India."
+        keywords="Cognisys services, AI CCTV surveillance, face recognition system, computer vision solutions, modern web development, Python projects, final year projects, custom software development"
+        canonical="https://cognisys.org.in/services"
+        breadcrumbs={breadcrumbs}
+        schema={collectionSchema}
+      />
+
       {/* Header */}
       <section style={{ padding: '60px 0 40px', textAlign: 'center', background: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.08) 0%, transparent 60%)' }}>
         <div className="container-custom">
+          {/* Breadcrumbs */}
+          <nav aria-label="Breadcrumb" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <Link to="/" style={{ color: '#64748B', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600 }}>Home</Link>
+            <span style={{ color: '#94A3B8', fontSize: '0.85rem' }}>/</span>
+            <span style={{ color: '#0284C7', fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>Services</span>
+          </nav>
+
           {orderSuccessBanner && (
             <div style={{
               background: '#F0FDF4',
@@ -272,3 +308,5 @@ export const Services = () => {
     </div>
   );
 };
+
+export default Services;

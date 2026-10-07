@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown, ChevronUp, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SEO } from '../components/SEO';
 
 export const FAQ = () => {
   const [openIdx, setOpenIdx] = useState(0);
@@ -32,10 +33,44 @@ export const FAQ = () => {
     }
   ];
 
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'FAQ', url: '/faq' }
+  ];
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    'mainEntity': faqs.map(f => ({
+      '@type': 'Question',
+      'name': f.q,
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': f.a
+      }
+    }))
+  };
+
   return (
     <div style={{ paddingTop: '72px' }}>
+      <SEO
+        title="Frequently Asked Questions | Cognisys AI Knowledge Base"
+        description="Find answers to frequently asked questions about Cognisys AI CCTV surveillance, face recognition systems, custom software, quotation process, and IEEE capstones."
+        keywords="Cognisys FAQ, AI CCTV questions, face recognition attendance FAQ, project development FAQ, student projects FAQ"
+        canonical="https://cognisys.org.in/faq"
+        breadcrumbs={breadcrumbs}
+        schema={faqSchema}
+      />
+
       <section style={{ padding: '60px 0 30px', textAlign: 'center', background: 'radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 60%)' }}>
         <div className="container-custom">
+          {/* Breadcrumbs */}
+          <nav aria-label="Breadcrumb" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <Link to="/" style={{ color: '#64748B', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600 }}>Home</Link>
+            <span style={{ color: '#94A3B8', fontSize: '0.85rem' }}>/</span>
+            <span style={{ color: '#0284C7', fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>FAQ</span>
+          </nav>
+
           <div className="badge" style={{ marginBottom: '14px' }}>
             <HelpCircle size={14} />
             <span>KNOWLEDGE BASE</span>

@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import confetti from 'canvas-confetti';
 import { api } from '../services/api';
 import { smtpService } from '../services/smtpService';
+import { SEO } from '../components/SEO';
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
@@ -85,8 +86,21 @@ export const Contact = () => {
     }
   };
 
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'Contact', url: '/contact' }
+  ];
+
   return (
     <div style={{ paddingTop: '72px' }}>
+      <SEO
+        title="Contact Cognisys AI | Engineering Inquiries & Quotation Desk"
+        description="Contact Cognisys Technologies for AI CCTV surveillance systems, face recognition solutions, modern web platforms, custom software, and engineering capstone development in India."
+        keywords="Contact Cognisys, Cognisys helpline, Cognisys email, project development company India contact, AI company Chennai India"
+        canonical="https://cognisys.org.in/contact"
+        breadcrumbs={breadcrumbs}
+      />
+
       {/* Header */}
       <section style={{
         padding: '60px 0 30px',
@@ -95,6 +109,13 @@ export const Contact = () => {
         borderBottom: '1px solid var(--border-subtle)'
       }}>
         <div className="container-custom">
+          {/* Breadcrumbs */}
+          <nav aria-label="Breadcrumb" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <Link to="/" style={{ color: '#64748B', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600 }}>Home</Link>
+            <span style={{ color: '#94A3B8', fontSize: '0.85rem' }}>/</span>
+            <span style={{ color: '#0284C7', fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>Contact</span>
+          </nav>
+
           <div className="badge" style={{ marginBottom: '14px' }}>
             <Sparkles size={13} />
             <span>DIRECT CHANNELS</span>

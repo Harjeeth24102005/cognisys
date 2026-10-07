@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { AboutStoryExperience } from '../components3d/AboutStoryExperience';
 import { getAssetUrl } from '../utils/assets';
+import { SEO } from '../components/SEO';
 
 // Reusable Video Player Card for About Sections
 const AboutSectionVideoCard = ({ videoFile, badge, stages = [], poster }) => {
@@ -178,8 +179,21 @@ const AboutSectionVideoCard = ({ videoFile, badge, stages = [], poster }) => {
 };
 
 export const About = () => {
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'About Cognisys', url: '/about' }
+  ];
+
   return (
     <div style={{ paddingTop: '72px' }}>
+      <SEO
+        title="About Cognisys AI | Engineering Intelligence, Computer Vision & Innovation"
+        description="Cognisys is an MSME-recognized engineering entity in India pioneering intelligent AI CCTV surveillance, edge computer vision, modern web applications, and capstone mentorship."
+        keywords="About Cognisys, Cognisys AI, AI company India, computer vision company India, software development company in India, MSME tech entity India"
+        canonical="https://cognisys.org.in/about"
+        breadcrumbs={breadcrumbs}
+      />
+
       {/* 1. INTRO HERO SECTION */}
       <section style={{ 
         padding: '50px 0 28px', 
@@ -187,6 +201,13 @@ export const About = () => {
         background: 'radial-gradient(circle at 50% 0%, rgba(0, 180, 216, 0.08) 0%, transparent 65%)' 
       }}>
         <div className="container-custom">
+          {/* Breadcrumbs */}
+          <nav aria-label="Breadcrumb" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <Link to="/" style={{ color: '#64748B', textDecoration: 'none', fontSize: '0.85rem', fontWeight: 600 }}>Home</Link>
+            <span style={{ color: '#94A3B8', fontSize: '0.85rem' }}>/</span>
+            <span style={{ color: '#0284C7', fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>About</span>
+          </nav>
+
           <div className="badge badge-cyan" style={{ marginBottom: '14px' }}>
             <Sparkles size={13} color="#00B4D8" />
             <span>INTERACTIVE ECOSYSTEM</span>

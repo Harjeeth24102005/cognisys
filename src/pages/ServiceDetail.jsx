@@ -3,10 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import { 
   CheckCircle2, ArrowRight, ChevronDown, ChevronUp, Cpu, 
   ShieldCheck, Layers, Terminal, Sparkles, HelpCircle, 
-  Play, Pause, Volume2, VolumeX, Maximize2, Eye, EyeOff, Activity, Clock
+  Play, Pause, Volume2, VolumeX, Maximize2, Eye, EyeOff, Activity, Clock, Briefcase
 } from 'lucide-react';
 import { api } from '../services/api';
-import { getServiceVideoUrl } from '../data/servicesData';
+import { getServiceBySlug, getServiceVideoUrl, CORE_SERVICES } from '../data/servicesData';
+import { SEO } from '../components/SEO';
 
 export const ServiceDetail = () => {
   const { slug } = useParams();
@@ -25,15 +26,26 @@ export const ServiceDetail = () => {
 
   useEffect(() => {
     setLoading(true);
-    api.getServiceBySlug(slug || 'ai-cctv-attendance')
-      .then(data => {
-        setService(data);
-        setIsCinemaMode(false);
-        setIsPlaying(true);
-        setIsMuted(true);
-      })
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
+    // Find service from enhanced local data first
+    const matchedService = getServiceBySlug(slug || 'ai-cctv-surveillance');
+    if (matchedService) {
+      setService(matchedService);
+      setIsCinemaMode(false);
+      setIsPlaying(true);
+      setIsMuted(true);
+      setLoading(false);
+    } else {
+      // Fallback to API if dynamic service exists
+      api.getServiceBySlug(slug || 'ai-cctv-surveillance')
+        .then(data => {
+          setService(data);
+          setIsCinemaMode(false);
+          setIsPlaying(true);
+          setIsMuted(true);
+        })
+        .catch(err => console.error(err))
+        .finally(() => setLoading(false));
+    }
   }, [slug]);
 
   // Ensure autoplay on mount or service change
@@ -142,7 +154,7 @@ export const ServiceDetail = () => {
   const videoUrl = getServiceVideoUrl(service);
 
   // Service specific custom FAQs
-  const faqs = [
+  const faqs = service.faqs && service.faqs.length > 0 ? service.faqs : [
     {
       q: `What is the typical deployment timeline for ${service.name}?`,
       a: "Depending on system scope and customization requirements, standard functional prototypes take 1 to 2 weeks, while full enterprise production deployments take 2 to 4 weeks with weekly sprint demonstrations."
@@ -161,15 +173,86 @@ export const ServiceDetail = () => {
     }
   ];
 
-  const processSteps = [
-    { num: "01", title: "Discovery & System Architecture", desc: "Detailed requirements analysis, technical specification, and compute/camera infrastructure planning." },
-    { num: "02", title: "Milestone Engineering & Sprints", desc: "Iterative development with bi-weekly demonstrations and real-time dashboard progress tracking." },
-    { num: "03", title: "Benchmarking & Latency QA", desc: "Edge hardware optimization, biometric accuracy testing, security audit, and integration verification." },
-    { num: "04", title: "Production Deployment & Handover", desc: "Zero-downtime production rollout, container orchestration, documentation handover, and ongoing support." }
+  const processSteps = service.workflow && service.workflow.length > 0 
+    ? service.workflow.map(w => ({ num: w.step, title: w.title, desc: w.desc }))
+    : [
+      { num: "01", title: "Discovery & System Architecture", desc: "Detailed requirements analysis, technical specification, and compute/camera infrastructure planning." },
+      { num: "02", title: "Milestone Engineering & Sprints", desc: "Iterative development with bi-weekly demonstrations and real-time dashboard progress tracking." },
+      { num: "03", title: "Benchmarking & Latency QA", desc: "Edge hardware optimization, biometric accuracy testing, security audit, and integration verification." },
+      { num: "04", title: "Production Deployment & Handover", desc: "Zero-downtime production rollout, container orchestration, documentation handover, and ongoing support." }
+    ];
+
+  // Related Services for Internal Linking
+  const relatedSlugs = service.related_services || [];
+  const relatedServices = CORE_SERVICES.filter(s => relatedSlugs.includes(s.slug));
+
+  const canonicalUrl = `https://cognisys.org.in/services/${service.slug}`;
+  const keywordsList = [
+    service.primaryKeyword || service.name,
+    ...(service.secondaryKeywords || []),
+    'Cognisys',
+    'Cognisys AI',
+    'India'
+  ].filter(Boolean).join(', ');
+
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'Services', url: '/services' },
+    { name: service.name, url: `/services/${service.slug}` }
   ];
+
+  const serviceSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    'name': service.name,
+    'serviceType': service.category,
+    'description': service.full_desc || service.short_desc,
+    'provider': {
+      '@type': 'Organization',
+      'name': 'Cognisys Technologies',
+      'url': 'https://cognisys.org.in'
+    },
+    'areaServed': {
+      '@type': 'Country',
+      'name': 'India'
+    },
+    'hasOfferCatalog': {
+      '@type': 'OfferCatalog',
+      'name': `${service.name} Deliverables`,
+      'itemListElement': features.map((feat, i) => ({
+        '@type': 'Offer',
+        'itemOffered': {
+          '@type': 'Service',
+          'name': feat
+        }
+      }))
+    }
+  };
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    'mainEntity': faqs.map(f => ({
+      '@type': 'Question',
+      'name': f.q,
+      'acceptedAnswer': {
+        '@type': 'Answer',
+        'text': f.a
+      }
+    }))
+  };
 
   return (
     <div style={{ paddingTop: '72px' }}>
+      <SEO
+        title={service.metaTitle || `${service.name} | Cognisys AI`}
+        description={service.metaDesc || service.short_desc}
+        keywords={keywordsList}
+        canonical={canonicalUrl}
+        breadcrumbs={breadcrumbs}
+        schema={[serviceSchema, faqSchema]}
+      />
+
       {/* 1. CINEMATIC VIDEO BACKGROUND HERO LANDING SECTION */}
       <section 
         ref={heroSectionRef} 
@@ -227,7 +310,7 @@ export const ServiceDetail = () => {
         <div className="container-custom" style={{ position: 'relative', zIndex: 2, width: '100%' }}>
           <div className={`service-hero-content ${isCinemaMode ? 'cinema-hidden' : ''}`}>
             {/* Top Breadcrumb Navigation */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <nav aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
               <Link 
                 to="/services" 
                 style={{ 
@@ -246,7 +329,7 @@ export const ServiceDetail = () => {
               <span style={{ color: '#00B4D8', fontSize: '0.85rem', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
                 {service.slug}
               </span>
-            </div>
+            </nav>
 
             {/* Badges Row */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '16px' }}>
@@ -279,11 +362,11 @@ export const ServiceDetail = () => {
                 }}
               >
                 <span className="live-indicator-dot" />
-                <span>OFFICIAL SYSTEM VIDEO BACKGROUND</span>
+                <span>OFFICIAL SYSTEM VIDEO DEMONSTRATION</span>
               </div>
             </div>
 
-            {/* Main Headline */}
+            {/* Main Headline - Exactly One H1 */}
             <h1 
               style={{ 
                 fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', 
@@ -321,7 +404,7 @@ export const ServiceDetail = () => {
                 style={{ 
                   padding: '14px 30px', 
                   fontSize: '0.96rem', 
-                  textDecoration: 'none',
+                  textDecoration: 'none', 
                   boxShadow: '0 8px 30px rgba(0, 180, 216, 0.4)',
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -428,7 +511,6 @@ export const ServiceDetail = () => {
             </span>
           </div>
 
-          {/* Play/Pause Button */}
           <button
             onClick={togglePlay}
             className="service-dock-btn"
@@ -438,7 +520,6 @@ export const ServiceDetail = () => {
             {isPlaying ? <Pause size={15} /> : <Play size={15} style={{ marginLeft: '2px' }} />}
           </button>
 
-          {/* Audio Mute/Unmute Button */}
           <button
             onClick={toggleMute}
             className={`service-dock-btn ${!isMuted ? 'active' : ''}`}
@@ -448,7 +529,6 @@ export const ServiceDetail = () => {
             {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
           </button>
 
-          {/* Cinema Mode Toggle (Hide text to enjoy the video) */}
           <button
             onClick={toggleCinemaMode}
             className={`service-dock-btn ${isCinemaMode ? 'active' : ''}`}
@@ -458,7 +538,6 @@ export const ServiceDetail = () => {
             {isCinemaMode ? <Eye size={15} /> : <EyeOff size={15} />}
           </button>
 
-          {/* Fullscreen Button */}
           <button
             onClick={toggleFullscreen}
             className="service-dock-btn"
@@ -483,16 +562,16 @@ export const ServiceDetail = () => {
             <div>
               <div className="badge badge-purple" style={{ marginBottom: '12px' }}>SYSTEM ARCHITECTURE</div>
               <h2 style={{ fontSize: '2rem', color: '#0B132B', marginBottom: '16px', fontWeight: 800 }}>
-                Comprehensive Technical Scope
+                Comprehensive Technical Scope &amp; Architecture
               </h2>
               <p style={{ fontSize: '1.02rem', color: '#1E293B', lineHeight: 1.8, marginBottom: '28px', fontWeight: 500 }}>
                 {service.full_desc}
               </p>
 
               {/* Technologies */}
-              <h4 style={{ fontSize: '0.88rem', color: '#0284C7', fontFamily: 'var(--font-mono)', marginBottom: '14px', fontWeight: 700, letterSpacing: '0.04em' }}>
+              <h3 style={{ fontSize: '0.88rem', color: '#0284C7', fontFamily: 'var(--font-mono)', marginBottom: '14px', fontWeight: 700, letterSpacing: '0.04em' }}>
                 TECHNOLOGY STACK &amp; FRAMEWORKS:
-              </h4>
+              </h3>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '32px' }}>
                 {techs.map((t, i) => (
                   <span key={i} className="badge badge-cyan" style={{ fontSize: '0.82rem', padding: '7px 16px', fontWeight: 700 }}>
@@ -575,13 +654,13 @@ export const ServiceDetail = () => {
         </div>
       </section>
 
-      {/* 3. ENGINEERING PROCESS METHODOLOGY */}
+      {/* 3. STEP-BY-STEP WORKFLOW METHODOLOGY */}
       <section className="section-padding" style={{ background: '#F8FAFC', borderTop: '1px solid #E2E8F0', borderBottom: '1px solid #E2E8F0' }}>
         <div className="container-custom">
           <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px' }}>
             <div className="badge badge-cyan" style={{ marginBottom: '12px' }}>DELIVERY ROADMAP</div>
             <h2 style={{ fontSize: '2.2rem', color: '#0B132B', marginBottom: '12px', fontWeight: 800 }}>
-              How We Deliver Your System
+              How the System Operates &amp; Deploys
             </h2>
             <p style={{ color: '#1E293B', fontSize: '0.98rem', fontWeight: 500 }}>
               A disciplined, high-transparency engineering pipeline ensuring zero bottlenecks and reliable deployment.
@@ -600,10 +679,10 @@ export const ServiceDetail = () => {
                 }}>
                   {step.num}
                 </div>
-                <h4 style={{ fontSize: '1.1rem', color: '#0B132B', marginBottom: '8px', fontWeight: 700 }}>
+                <h3 style={{ fontSize: '1.1rem', color: '#0B132B', marginBottom: '8px', fontWeight: 700 }}>
                   {step.title}
-                </h4>
-                <p style={{ fontSize: '0.88rem', color: '#475569', lineHeight: 1.6 }}>
+                </h3>
+                <p style={{ fontSize: '0.88rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
                   {step.desc}
                 </p>
               </div>
@@ -612,8 +691,132 @@ export const ServiceDetail = () => {
         </div>
       </section>
 
-      {/* 4. FAQ ACCORDION */}
-      <section className="section-padding" style={{ background: '#FFFFFF' }}>
+      {/* 4. REAL-WORLD APPLICATIONS (IF AVAILABLE) */}
+      {service.applications && service.applications.length > 0 && (
+        <section className="section-padding" style={{ background: '#FFFFFF' }}>
+          <div className="container-custom">
+            <div style={{ textAlign: 'center', maxWidth: '640px', margin: '0 auto 48px' }}>
+              <div className="badge badge-purple" style={{ marginBottom: '12px' }}>PRACTICAL IMPLEMENTATIONS</div>
+              <h2 style={{ fontSize: '2.2rem', color: '#0B132B', marginBottom: '12px', fontWeight: 800 }}>
+                Real-World Applications &amp; Use Cases
+              </h2>
+              <p style={{ color: '#475569', fontSize: '0.98rem' }}>
+                Explore how Cognisys {service.name} drives measurable efficiency across diverse enterprise and operational environments.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '20px' }}>
+              {service.applications.map((app, idx) => (
+                <div key={idx} className="glass-panel" style={{ padding: '24px', background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '14px' }}>
+                  <div style={{
+                    width: '38px',
+                    height: '38px',
+                    borderRadius: '10px',
+                    background: 'rgba(0, 180, 216, 0.12)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#00B4D8',
+                    marginBottom: '14px'
+                  }}>
+                    <Briefcase size={18} />
+                  </div>
+                  <h3 style={{ fontSize: '1.05rem', color: '#0B132B', marginBottom: '8px', fontWeight: 700 }}>
+                    {app.title}
+                  </h3>
+                  <p style={{ fontSize: '0.88rem', color: '#475569', lineHeight: 1.6, margin: 0 }}>
+                    {app.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 5. RELATED SERVICES (INTERNAL LINKING FOR SEMANTIC SEO) */}
+      {relatedServices.length > 0 && (
+        <section className="section-padding" style={{ background: '#F8FAFC', borderTop: '1px solid #E2E8F0' }}>
+          <div className="container-custom">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '32px', flexWrap: 'wrap', gap: '14px' }}>
+              <div>
+                <div className="badge badge-cyan" style={{ marginBottom: '10px' }}>SEMANTIC ARCHITECTURE</div>
+                <h2 style={{ fontSize: '1.8rem', color: '#0B132B', fontWeight: 800 }}>
+                  Related Solutions &amp; Complementary Systems
+                </h2>
+              </div>
+              <Link to="/services" style={{ color: '#0284C7', textDecoration: 'none', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>View All Services</span>
+                <ArrowRight size={15} />
+              </Link>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+              {relatedServices.map((rel) => {
+                const RelIcon = rel.icon || Layers;
+                return (
+                  <div
+                    key={rel.slug}
+                    className="glass-panel card-hover-elevation"
+                    style={{
+                      padding: '24px',
+                      background: '#FFFFFF',
+                      borderRadius: '16px',
+                      border: '1px solid #E2E8F0',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div>
+                      <div style={{
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '10px',
+                        background: 'rgba(0, 180, 216, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: rel.color || '#00B4D8',
+                        marginBottom: '14px'
+                      }}>
+                        <RelIcon size={18} />
+                      </div>
+                      <h3 style={{ fontSize: '1.1rem', color: '#0B132B', marginBottom: '8px', fontWeight: 700 }}>
+                        {rel.name}
+                      </h3>
+                      <p style={{ fontSize: '0.86rem', color: '#475569', lineHeight: 1.6, marginBottom: '16px' }}>
+                        {rel.short_desc}
+                      </p>
+                    </div>
+
+                    <div style={{ paddingTop: '12px', borderTop: '1px solid #F1F5F9' }}>
+                      <Link
+                        to={`/services/${rel.slug}`}
+                        style={{
+                          color: '#0284C7',
+                          textDecoration: 'none',
+                          fontSize: '0.85rem',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        <span>Explore {rel.name}</span>
+                        <ArrowRight size={14} />
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 6. FAQ ACCORDION */}
+      <section className="section-padding" style={{ background: '#FFFFFF', borderTop: '1px solid #E2E8F0' }}>
         <div className="container-custom" style={{ maxWidth: '800px' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <div className="badge badge-purple" style={{ marginBottom: '12px' }}>FREQUENTLY ASKED QUESTIONS</div>
@@ -641,13 +844,13 @@ export const ServiceDetail = () => {
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '1rem', fontWeight: 700, color: isOpen ? '#0284C7' : '#0F172A' }}>
+                    <h3 style={{ fontSize: '1rem', fontWeight: 700, color: isOpen ? '#0284C7' : '#0F172A', margin: 0 }}>
                       {faq.q}
-                    </span>
+                    </h3>
                     {isOpen ? <ChevronUp size={18} color="#0284C7" /> : <ChevronDown size={18} color="#0F172A" />}
                   </div>
                   {isOpen && (
-                    <p style={{ marginTop: '14px', fontSize: '0.92rem', color: '#334155', lineHeight: 1.7, borderTop: '1px solid #E2E8F0', paddingTop: '14px' }}>
+                    <p style={{ marginTop: '14px', fontSize: '0.92rem', color: '#334155', lineHeight: 1.7, borderTop: '1px solid #E2E8F0', paddingTop: '14px', marginBottom: 0 }}>
                       {faq.a}
                     </p>
                   )}
@@ -658,7 +861,7 @@ export const ServiceDetail = () => {
         </div>
       </section>
 
-      {/* 5. BOTTOM CTA BANNER */}
+      {/* 7. BOTTOM CTA BANNER */}
       <section style={{ padding: '0 0 80px', background: '#FFFFFF' }}>
         <div className="container-custom">
           <div 
@@ -695,3 +898,5 @@ export const ServiceDetail = () => {
     </div>
   );
 };
+
+export default ServiceDetail;
